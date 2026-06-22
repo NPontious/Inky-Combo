@@ -65,7 +65,15 @@ class Dashboard(BasePlugin):
         except Exception as e:
             logger.error(f"Timeline generation failed: {e}")
 
-        # 2. Month Calendar (Top Right Three-Quarters)
+        # 2. Month Calendar (Right Side)
+        weather_layout = settings.get('weatherLayout', 'full')
+
+        right_w = width - timeline_w
+        if weather_layout == 'none':
+            month_h = height
+        else:
+            month_h = (height * 2) // 3
+
         cal_settings_month = {
             'calendarURLs[]': urls,
             'calendarColors[]': colors,
@@ -75,8 +83,6 @@ class Dashboard(BasePlugin):
             'displayWeekends': 'true',
             'fontSize': font_size
         }
-        right_w = width - timeline_w
-        month_h = (height * 2) // 3
         month_config = MockDeviceConfig(device_config, right_w, month_h)
         try:
             month_img = Calendar({"id": "calendar"}).generate_image(cal_settings_month, month_config)
@@ -84,57 +90,58 @@ class Dashboard(BasePlugin):
         except Exception as e:
             logger.error(f"Month calendar generation failed: {e}")
 
-        # 3. Weather (Bottom Right Third)
-        weather_layout = settings.get('weatherLayout', 'full')
-        
-        weather_settings = {
-            'latitude': settings.get('latitude', '40.7128'),
-            'longitude': settings.get('longitude', '-74.0060'),
-            'weatherProvider': 'OpenMeteo',
-            'units': settings.get('units', 'imperial'),
-            'titleSelection': 'custom',
-            'customTitle': 'Weather',
-            'weatherTimeZone': 'locationTimeZone',
-            'fontSize': font_size,
-            'displayMetrics': 'true'
-        }
+        if weather_layout != 'none':
+            # 3. Weather (Bottom Right Third)
+            weather_settings = {
+                'latitude': settings.get('latitude', '40.7128'),
+                'longitude': settings.get('longitude', '-74.0060'),
+                'weatherProvider': 'OpenMeteo',
+                'units': settings.get('units', 'imperial'),
+                'titleSelection': 'custom',
+                'customTitle': 'Weather',
+                'weatherTimeZone': 'locationTimeZone',
+                'fontSize': font_size,
+                'displayMetrics': 'true'
+            }
 
-        if weather_layout == 'full':
-            weather_settings.update({
-                'displayGraph': 'true',
-                'displayGraphIcons': 'true',
-                'displayRain': 'true',
-                'displayForecast': 'true',
-                'forecastDays': '5',
-                'moonPhase': 'true'
-            })
-        elif weather_layout == 'hourly':
-            weather_settings.update({
-                'displayGraph': 'true',
-                'displayGraphIcons': 'true',
-                'displayRain': 'true',
-                'displayForecast': 'false'
-            })
-        elif weather_layout == 'forecast':
-            weather_settings.update({
-                'displayGraph': 'false',
-                'displayForecast': 'true',
-                'forecastDays': '5',
-                'moonPhase': 'true'
-            })
-        weather_h = height - month_h
-        weather_config = MockDeviceConfig(device_config, right_w, weather_h)
-        try:
-            weather_img = Weather({"id": "weather"}).generate_image(weather_settings, weather_config)
-            dashboard_image.paste(weather_img, (timeline_w, month_h))
-        except Exception as e:
-            logger.error(f"Weather generation failed: {e}")
+            if weather_layout == 'full':
+                weather_settings.update({
+                    'displayGraph': 'true',
+                    'displayGraphIcons': 'true',
+                    'displayRain': 'true',
+                    'displayForecast': 'true',
+                    'forecastDays': '5',
+                    'moonPhase': 'true'
+                })
+            elif weather_layout == 'hourly':
+                weather_settings.update({
+                    'displayGraph': 'true',
+                    'displayGraphIcons': 'true',
+                    'displayRain': 'true',
+                    'displayForecast': 'false'
+                })
+            elif weather_layout == 'forecast':
+                weather_settings.update({
+                    'displayGraph': 'false',
+                    'displayForecast': 'true',
+                    'forecastDays': '5',
+                    'moonPhase': 'true'
+                })
+            weather_h = height - month_h
+            weather_config = MockDeviceConfig(device_config, right_w, weather_h)
+            try:
+                weather_img = Weather({"id": "weather"}).generate_image(weather_settings, weather_config)
+                dashboard_image.paste(weather_img, (timeline_w, month_h))
+            except Exception as e:
+                logger.error(f"Weather generation failed: {e}")
 
         # Draw dividing lines
         draw = ImageDraw.Draw(dashboard_image)
-        # Vertical line at 1/3 mark
+        # Vertical line at timeline boundary
         draw.line([(timeline_w, 0), (timeline_w, height)], fill="black", width=4)
-        # Horizontal line on the right side
-        draw.line([(timeline_w, month_h), (width, month_h)], fill="black", width=4)
+        
+        if weather_layout != 'none':
+            # Horizontal line on the right side
+            draw.line([(timeline_w, month_h), (width, month_h)], fill="black", width=4)
 
         return dashboard_image
