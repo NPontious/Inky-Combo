@@ -46,6 +46,16 @@
         <option value="standard">Standard (K)</option>
     </select>
 </div>
+<div class="form-group">
+    <label for="fontSize" class="form-label">Font Size:</label>
+    <select id="fontSize" name="fontSize" class="form-input">
+        <option value="x-small">Extra Small</option>
+        <option value="small">Small</option>
+        <option value="normal" selected>Normal</option>
+        <option value="large">Large</option>
+        <option value="x-large">Extra Large</option>
+    </select>
+</div>
 
 <script>
     function addCalendarInput(url = '', color = '#000000') {
@@ -94,6 +104,10 @@
                 url: url || '',
                 color: colors[i] || '#000000'
             }));
+            
+            if (pluginSettings.fontSize) {
+                document.getElementById('fontSize').value = pluginSettings.fontSize;
+            }
         }
 
         calendars.forEach(({ url, color }) => {

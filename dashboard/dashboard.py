@@ -45,16 +45,19 @@ class Dashboard(BasePlugin):
             urls = [urls]
             colors = [colors]
 
-        # 1. Timeline (Left Third)
+        font_size = settings.get('fontSize', 'normal')
+
+        # 1. Timeline (Left Quarter)
         cal_settings_timeline = {
             'calendarURLs[]': urls,
             'calendarColors[]': colors,
             'viewMode': 'timeGridDay',
             'language': 'en',
             'showDate': 'true',
-            'displayWeekends': 'true'
+            'displayWeekends': 'true',
+            'fontSize': font_size
         }
-        timeline_w = width // 3
+        timeline_w = width // 4
         timeline_config = MockDeviceConfig(device_config, timeline_w, height)
         try:
             timeline_img = Calendar({"id": "calendar"}).generate_image(cal_settings_timeline, timeline_config)
@@ -62,14 +65,15 @@ class Dashboard(BasePlugin):
         except Exception as e:
             logger.error(f"Timeline generation failed: {e}")
 
-        # 2. Month Calendar (Top Right Two-Thirds)
+        # 2. Month Calendar (Top Right Three-Quarters)
         cal_settings_month = {
             'calendarURLs[]': urls,
             'calendarColors[]': colors,
             'viewMode': 'dayGridMonth',
             'language': 'en',
             'showDate': 'true',
-            'displayWeekends': 'true'
+            'displayWeekends': 'true',
+            'fontSize': font_size
         }
         right_w = width - timeline_w
         month_h = height // 2
@@ -80,7 +84,7 @@ class Dashboard(BasePlugin):
         except Exception as e:
             logger.error(f"Month calendar generation failed: {e}")
 
-        # 3. Weather (Bottom Right Two-Thirds)
+        # 3. Weather (Bottom Right Three-Quarters)
         weather_settings = {
             'latitude': settings.get('latitude', '40.7128'),
             'longitude': settings.get('longitude', '-74.0060'),
@@ -91,7 +95,8 @@ class Dashboard(BasePlugin):
             'weatherTimeZone': 'locationTimeZone',
             'displayGraph': 'true',
             'displayForecast': 'true',
-            'forecastDays': '5'
+            'forecastDays': '5',
+            'fontSize': font_size
         }
         weather_h = height - month_h
         weather_config = MockDeviceConfig(device_config, right_w, weather_h)
