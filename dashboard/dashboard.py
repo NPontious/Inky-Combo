@@ -35,14 +35,20 @@ class Dashboard(BasePlugin):
             def load_env_key(self, key):
                 return self.original_config.load_env_key(key)
 
-        calendar_url = settings.get("calendarUrl")
-        if not calendar_url:
-            calendar_url = "https://www.calendarlabs.com/ical-calendar/ics/76/US_Holidays.ics"
+        urls = settings.get('calendarURLs[]')
+        colors = settings.get('calendarColors[]')
+        
+        if not urls:
+            urls = ["https://www.calendarlabs.com/ical-calendar/ics/76/US_Holidays.ics"]
+            colors = ["#000000"]
+        elif not isinstance(urls, list):
+            urls = [urls]
+            colors = [colors]
 
         # 1. Timeline (Left Third)
         cal_settings_timeline = {
-            'calendarURLs[]': [calendar_url],
-            'calendarColors[]': ['#000000'],
+            'calendarURLs[]': urls,
+            'calendarColors[]': colors,
             'viewMode': 'timeGridDay',
             'language': 'en',
             'showDate': 'true',
@@ -58,8 +64,8 @@ class Dashboard(BasePlugin):
 
         # 2. Month Calendar (Top Right Two-Thirds)
         cal_settings_month = {
-            'calendarURLs[]': [calendar_url],
-            'calendarColors[]': ['#000000'],
+            'calendarURLs[]': urls,
+            'calendarColors[]': colors,
             'viewMode': 'dayGridMonth',
             'language': 'en',
             'showDate': 'true',
@@ -82,7 +88,10 @@ class Dashboard(BasePlugin):
             'units': settings.get('units', 'imperial'),
             'titleSelection': 'custom',
             'customTitle': 'Weather',
-            'weatherTimeZone': 'locationTimeZone'
+            'weatherTimeZone': 'locationTimeZone',
+            'displayGraph': 'true',
+            'displayForecast': 'true',
+            'forecastDays': '5'
         }
         weather_h = height - month_h
         weather_config = MockDeviceConfig(device_config, right_w, weather_h)
