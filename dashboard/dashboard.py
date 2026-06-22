@@ -39,37 +39,42 @@ class Dashboard(BasePlugin):
         if not calendar_url:
             calendar_url = "https://www.calendarlabs.com/ical-calendar/ics/76/US_Holidays.ics"
 
-        # 1. Timeline (Left half)
+        # 1. Timeline (Left Third)
         cal_settings_timeline = {
             'calendarURLs[]': [calendar_url],
             'calendarColors[]': ['#000000'],
             'viewMode': 'timeGridDay',
             'language': 'en',
-            'showDate': 'true'
+            'showDate': 'true',
+            'displayWeekends': 'true'
         }
-        timeline_config = MockDeviceConfig(device_config, width // 2, height)
+        timeline_w = width // 3
+        timeline_config = MockDeviceConfig(device_config, timeline_w, height)
         try:
             timeline_img = Calendar({"id": "calendar"}).generate_image(cal_settings_timeline, timeline_config)
             dashboard_image.paste(timeline_img, (0, 0))
         except Exception as e:
             logger.error(f"Timeline generation failed: {e}")
 
-        # 2. Month Calendar (Top Right)
+        # 2. Month Calendar (Top Right Two-Thirds)
         cal_settings_month = {
             'calendarURLs[]': [calendar_url],
             'calendarColors[]': ['#000000'],
             'viewMode': 'dayGridMonth',
             'language': 'en',
-            'showDate': 'true'
+            'showDate': 'true',
+            'displayWeekends': 'true'
         }
-        month_config = MockDeviceConfig(device_config, width // 2, height // 2)
+        right_w = width - timeline_w
+        month_h = height // 2
+        month_config = MockDeviceConfig(device_config, right_w, month_h)
         try:
             month_img = Calendar({"id": "calendar"}).generate_image(cal_settings_month, month_config)
-            dashboard_image.paste(month_img, (width // 2, 0))
+            dashboard_image.paste(month_img, (timeline_w, 0))
         except Exception as e:
             logger.error(f"Month calendar generation failed: {e}")
 
-        # 3. Weather (Bottom Right)
+        # 3. Weather (Bottom Right Two-Thirds)
         weather_settings = {
             'latitude': settings.get('latitude', '40.7128'),
             'longitude': settings.get('longitude', '-74.0060'),
@@ -79,18 +84,19 @@ class Dashboard(BasePlugin):
             'customTitle': 'Weather',
             'weatherTimeZone': 'locationTimeZone'
         }
-        weather_config = MockDeviceConfig(device_config, width // 2, height // 2)
+        weather_h = height - month_h
+        weather_config = MockDeviceConfig(device_config, right_w, weather_h)
         try:
             weather_img = Weather({"id": "weather"}).generate_image(weather_settings, weather_config)
-            dashboard_image.paste(weather_img, (width // 2, height // 2))
+            dashboard_image.paste(weather_img, (timeline_w, month_h))
         except Exception as e:
             logger.error(f"Weather generation failed: {e}")
 
         # Draw dividing lines
         draw = ImageDraw.Draw(dashboard_image)
-        # Vertical line down the middle
-        draw.line([(width // 2, 0), (width // 2, height)], fill="black", width=4)
+        # Vertical line at 1/3 mark
+        draw.line([(timeline_w, 0), (timeline_w, height)], fill="black", width=4)
         # Horizontal line on the right side
-        draw.line([(width // 2, height // 2), (width, height // 2)], fill="black", width=4)
+        draw.line([(timeline_w, month_h), (width, month_h)], fill="black", width=4)
 
         return dashboard_image
