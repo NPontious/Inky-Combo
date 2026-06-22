@@ -56,6 +56,14 @@
         <option value="x-large">Extra Large</option>
     </select>
 </div>
+<div class="form-group">
+    <label for="weatherLayout" class="form-label">Weather Layout:</label>
+    <select id="weatherLayout" name="weatherLayout" class="form-input">
+        <option value="full" selected>Full (Graph & 5-Day Forecast)</option>
+        <option value="hourly">Hourly Graph Only</option>
+        <option value="forecast">5-Day Forecast Only</option>
+    </select>
+</div>
 
 <script>
     function addCalendarInput(url = '', color = '#000000') {
@@ -107,6 +115,9 @@
             
             if (pluginSettings.fontSize) {
                 document.getElementById('fontSize').value = pluginSettings.fontSize;
+            }
+            if (pluginSettings.weatherLayout) {
+                document.getElementById('weatherLayout').value = pluginSettings.weatherLayout;
             }
         }
 

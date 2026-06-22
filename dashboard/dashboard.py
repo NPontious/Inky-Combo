@@ -76,7 +76,7 @@ class Dashboard(BasePlugin):
             'fontSize': font_size
         }
         right_w = width - timeline_w
-        month_h = height // 2
+        month_h = (height * 2) // 3
         month_config = MockDeviceConfig(device_config, right_w, month_h)
         try:
             month_img = Calendar({"id": "calendar"}).generate_image(cal_settings_month, month_config)
@@ -84,7 +84,9 @@ class Dashboard(BasePlugin):
         except Exception as e:
             logger.error(f"Month calendar generation failed: {e}")
 
-        # 3. Weather (Bottom Right Three-Quarters)
+        # 3. Weather (Bottom Right Third)
+        weather_layout = settings.get('weatherLayout', 'full')
+        
         weather_settings = {
             'latitude': settings.get('latitude', '40.7128'),
             'longitude': settings.get('longitude', '-74.0060'),
@@ -93,11 +95,33 @@ class Dashboard(BasePlugin):
             'titleSelection': 'custom',
             'customTitle': 'Weather',
             'weatherTimeZone': 'locationTimeZone',
-            'displayGraph': 'true',
-            'displayForecast': 'true',
-            'forecastDays': '5',
-            'fontSize': font_size
+            'fontSize': font_size,
+            'displayMetrics': 'true'
         }
+
+        if weather_layout == 'full':
+            weather_settings.update({
+                'displayGraph': 'true',
+                'displayGraphIcons': 'true',
+                'displayRain': 'true',
+                'displayForecast': 'true',
+                'forecastDays': '5',
+                'moonPhase': 'true'
+            })
+        elif weather_layout == 'hourly':
+            weather_settings.update({
+                'displayGraph': 'true',
+                'displayGraphIcons': 'true',
+                'displayRain': 'true',
+                'displayForecast': 'false'
+            })
+        elif weather_layout == 'forecast':
+            weather_settings.update({
+                'displayGraph': 'false',
+                'displayForecast': 'true',
+                'forecastDays': '5',
+                'moonPhase': 'true'
+            })
         weather_h = height - month_h
         weather_config = MockDeviceConfig(device_config, right_w, weather_h)
         try:
