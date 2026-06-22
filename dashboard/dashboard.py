@@ -49,7 +49,7 @@ class Dashboard(BasePlugin):
         }
         timeline_config = MockDeviceConfig(device_config, width // 2, height)
         try:
-            timeline_img = Calendar().generate_image(cal_settings_timeline, timeline_config)
+            timeline_img = Calendar({"id": "calendar"}).generate_image(cal_settings_timeline, timeline_config)
             dashboard_image.paste(timeline_img, (0, 0))
         except Exception as e:
             logger.error(f"Timeline generation failed: {e}")
@@ -64,7 +64,7 @@ class Dashboard(BasePlugin):
         }
         month_config = MockDeviceConfig(device_config, width // 2, height // 2)
         try:
-            month_img = Calendar().generate_image(cal_settings_month, month_config)
+            month_img = Calendar({"id": "calendar"}).generate_image(cal_settings_month, month_config)
             dashboard_image.paste(month_img, (width // 2, 0))
         except Exception as e:
             logger.error(f"Month calendar generation failed: {e}")
@@ -81,7 +81,7 @@ class Dashboard(BasePlugin):
         }
         weather_config = MockDeviceConfig(device_config, width // 2, height // 2)
         try:
-            weather_img = Weather().generate_image(weather_settings, weather_config)
+            weather_img = Weather({"id": "weather"}).generate_image(weather_settings, weather_config)
             dashboard_image.paste(weather_img, (width // 2, height // 2))
         except Exception as e:
             logger.error(f"Weather generation failed: {e}")
