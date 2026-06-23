@@ -81,7 +81,9 @@ class Dashboard(BasePlugin):
             'language': 'en',
             'showDate': 'true',
             'displayWeekends': 'true',
-            'fontSize': font_size
+            'fontSize': font_size,
+            'displayTitle': 'true',
+            'displayEventTime': 'true'
         }
         month_config = MockDeviceConfig(device_config, right_w, month_h)
         try:
