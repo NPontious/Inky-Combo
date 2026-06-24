@@ -65,6 +65,19 @@
         <option value="none">None (Disabled)</option>
     </select>
 </div>
+<div class="form-group">
+    <label class="form-label">Timeline Range (Hours):</label>
+    <div style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+            <span>Start</span>
+            <input type="number" id="startTimeInterval" name="startTimeInterval" class="form-input" min="0" max="24" value="6" />
+        </div>
+        <div style="flex: 1;">
+            <span>End</span>
+            <input type="number" id="endTimeInterval" name="endTimeInterval" class="form-input" min="0" max="24" value="22" />
+        </div>
+    </div>
+</div>
 
 <script>
     function addCalendarInput(url = '', color = '#000000') {
@@ -119,6 +132,12 @@
             }
             if (pluginSettings.weatherLayout) {
                 document.getElementById('weatherLayout').value = pluginSettings.weatherLayout;
+            }
+            if (pluginSettings.startTimeInterval) {
+                document.getElementById('startTimeInterval').value = pluginSettings.startTimeInterval;
+            }
+            if (pluginSettings.endTimeInterval) {
+                document.getElementById('endTimeInterval').value = pluginSettings.endTimeInterval;
             }
         }
 

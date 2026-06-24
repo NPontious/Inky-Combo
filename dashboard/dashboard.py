@@ -47,6 +47,45 @@ class Dashboard(BasePlugin):
 
         font_size = settings.get('fontSize', 'normal')
 
+        # Dynamic Timeline Range Calculation
+        user_start = int(settings.get('startTimeInterval', '6'))
+        user_end = int(settings.get('endTimeInterval', '22'))
+
+        min_hour = user_start
+        max_hour = user_end
+
+        try:
+            from datetime import timedelta
+            import pytz
+            tz = pytz.timezone(settings.get("timezone", "UTC"))
+            now = datetime.now(tz)
+            start_range = datetime(now.year, now.month, now.day, tzinfo=tz)
+            end_range = start_range + timedelta(days=1)
+            
+            cal_instance = Calendar({"id": "calendar"})
+            events = cal_instance.fetch_ics_events(urls, colors, tz, start_range, end_range)
+            
+            for event in events:
+                if not event.get('allDay'):
+                    start_dt = datetime.fromisoformat(event['start'])
+                    if start_dt.hour < min_hour:
+                        min_hour = start_dt.hour
+                        
+                    if 'end' in event:
+                        end_dt = datetime.fromisoformat(event['end'])
+                        end_h = end_dt.hour
+                        if end_dt.minute > 0:
+                            end_h += 1
+                        if end_h > max_hour:
+                            max_hour = end_h
+        except Exception as e:
+            logger.error(f"Failed to calculate dynamic time interval: {e}")
+
+        min_hour = max(0, min_hour)
+        max_hour = min(24, max_hour)
+        if max_hour <= min_hour:
+            max_hour = min_hour + 1
+
         # 1. Timeline (Left Quarter)
         cal_settings_timeline = {
             'calendarURLs[]': urls,
@@ -55,7 +94,9 @@ class Dashboard(BasePlugin):
             'language': 'en',
             'showDate': 'true',
             'displayWeekends': 'true',
-            'fontSize': font_size
+            'fontSize': font_size,
+            'startTimeInterval': str(min_hour),
+            'endTimeInterval': str(max_hour)
         }
         timeline_w = width // 4
         timeline_config = MockDeviceConfig(device_config, timeline_w, height)
