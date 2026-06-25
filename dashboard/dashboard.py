@@ -31,25 +31,27 @@ except ImportError:
     Comic = None
 
 
-class OffsetCalendar(Calendar):
-    """Utility subclass to render calendar events offset by N days with optional time axis suppression."""
-    def __init__(self, config, day_offset=0, hide_time_axis=False):
+class MultiDayCalendar(Calendar):
+    """Unified multi-day timeline calendar ensuring perfect Y-axis and grid line alignment across days."""
+    def __init__(self, config, days=1):
         super().__init__(config)
-        self.day_offset = day_offset
-        self.hide_time_axis = hide_time_axis
+        self.days = max(1, int(days))
 
     def get_view_range(self, view, current_dt, settings):
-        shifted_dt = current_dt + timedelta(days=self.day_offset)
-        return super().get_view_range(view, shifted_dt, settings)
+        start = datetime(current_dt.year, current_dt.month, current_dt.day, tzinfo=current_dt.tzinfo)
+        end = start + timedelta(days=self.days)
+        return start, end
+
+    def generate_image(self, settings, device_config):
+        orig_view = settings.get("viewMode")
+        settings["viewMode"] = "timeGridDay"
+        try:
+            return super().generate_image(settings, device_config)
+        finally:
+            if orig_view:
+                settings["viewMode"] = orig_view
 
     def render_image(self, dimensions, html_file, css_file=None, template_params={}):
-        if self.day_offset != 0 and 'current_dt' in template_params:
-            try:
-                dt = datetime.fromisoformat(template_params['current_dt']) + timedelta(days=self.day_offset)
-                template_params['current_dt'] = dt.isoformat()
-            except Exception as e:
-                logger.warning(f"Failed to shift current_dt in OffsetCalendar: {e}")
-
         css_files = [os.path.join(BASE_PLUGIN_RENDER_DIR, "plugin.css")]
         if css_file:
             plugin_css = os.path.join(self.render_dir, css_file)
@@ -64,9 +66,25 @@ class OffsetCalendar(Calendar):
         template = self.env.get_template(html_file)
         rendered_html = template.render(template_params)
 
-        if self.hide_time_axis:
-            hide_css = "<style>.fc-timegrid-axis { display: none !important; width: 0 !important; } .fc-timegrid-slot-label { display: none !important; }</style>"
-            rendered_html += hide_css
+        custom_fc_init = f"""
+            views: {{
+                customMultiDay: {{
+                    type: 'timeGrid',
+                    duration: {{ days: {self.days} }}
+                }}
+            }},
+            initialView: 'customMultiDay',
+        """
+        rendered_html = rendered_html.replace("initialView: 'timeGridDay',", custom_fc_init)
+
+        google_style_css = """
+        <style>
+        .fc-timegrid-col-events { margin: 0 4px !important; }
+        .fc-event { border-radius: 6px !important; border: none !important; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+        .fc-col-header-cell { padding: 6px 0 !important; font-weight: 700 !important; }
+        </style>
+        """
+        rendered_html += google_style_css
 
         return take_screenshot_html(rendered_html, dimensions)
 
@@ -334,33 +352,7 @@ class Dashboard(BasePlugin):
                     'startTimeInterval': str(min_hour),
                     'endTimeInterval': str(max_hour)
                 }
-                if timeline_days <= 1:
-                    return Calendar({"id": "calendar"}).generate_image(cal_settings, mock_config)
-                else:
-                    combined_img = Image.new("RGB", (w, h), "white")
-                    axis_w = 48 if w > 300 else 36
-                    day_event_w = max(1, (w - axis_w) // timeline_days)
-
-                    cur_x = 0
-                    for i in range(timeline_days):
-                        if i == 0:
-                            cur_w = axis_w + day_event_w
-                            hide_axis = False
-                        elif i == timeline_days - 1:
-                            cur_w = max(1, w - cur_x)
-                            hide_axis = True
-                        else:
-                            cur_w = day_event_w
-                            hide_axis = True
-
-                        sub_config = MockChildConfig(device_config, cur_w, h)
-                        sub_cal = OffsetCalendar({"id": "calendar"}, day_offset=i, hide_time_axis=hide_axis)
-                        sub_img = sub_cal.generate_image(cal_settings, sub_config)
-                        if sub_img:
-                            combined_img.paste(sub_img, (cur_x, 0))
-                        cur_x += cur_w
-
-                    return combined_img
+                return MultiDayCalendar({"id": "calendar"}, days=timeline_days).generate_image(cal_settings, mock_config)
 
             elif widget_type == 'agenda':
                 agenda_settings = {
