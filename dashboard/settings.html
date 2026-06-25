@@ -5,24 +5,26 @@
     }
     .config-section {
         background: rgba(128, 128, 128, 0.08);
-        border: 1px solid rgba(128, 128, 128, 0.2);
+        border: 1px solid rgba(128, 128, 128, 0.22);
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 22px;
         backdrop-filter: blur(8px);
         animation: sectionFadeIn 0.25s ease-out;
-        transition: opacity 0.2s;
     }
     .config-section-title {
-        font-size: 1.15rem;
+        font-size: 1.18rem;
         font-weight: 700;
-        color: inherit;
+        color: #f8fafc;
         margin-bottom: 16px;
         padding-bottom: 8px;
-        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
         display: flex;
         align-items: center;
         gap: 8px;
+    }
+    .config-section label, .config-section span {
+        color: #cbd5e1;
     }
     .config-grid-2 {
         display: grid;
@@ -45,7 +47,7 @@
         background: transparent;
     }
     .remove-btn {
-        background: rgba(239, 68, 68, 0.15);
+        background: rgba(239, 68, 68, 0.18);
         border: 1px solid rgba(239, 68, 68, 0.4);
         color: #f87171;
         border-radius: 6px;
@@ -59,35 +61,161 @@
         transition: background 0.2s;
     }
     .remove-btn:hover {
-        background: rgba(239, 68, 68, 0.25);
+        background: rgba(239, 68, 68, 0.3);
     }
     .slot-hint {
         font-size: 0.88rem;
-        color: inherit;
-        opacity: 0.85;
+        color: #e2e8f0;
         margin-bottom: 14px;
-        background: rgba(59, 130, 246, 0.15);
+        background: rgba(59, 130, 246, 0.18);
         padding: 10px 14px;
         border-radius: 8px;
         border-left: 3px solid #3b82f6;
         line-height: 1.4;
     }
+
+    /* Interactive Layout Splitter Tree Styles */
+    .tree-builder-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+        min-height: 220px;
+    }
+    .node-widget {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        flex: 1;
+        min-width: 0;
+        min-height: 100px;
+        justify-content: space-between;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .widget-header {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .widget-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .widget-select {
+        font-size: 0.88rem;
+        padding: 8px;
+        background: #1e293b;
+        color: #f8fafc;
+        border: 1px solid #475569;
+        border-radius: 6px;
+        width: 100%;
+    }
+    .widget-actions {
+        display: flex;
+        gap: 8px;
+    }
+    .action-btn {
+        flex: 1;
+        background: rgba(59, 130, 246, 0.18);
+        border: 1px solid rgba(59, 130, 246, 0.45);
+        color: #60a5fa;
+        border-radius: 5px;
+        padding: 6px 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.15s;
+    }
+    .action-btn:hover {
+        background: rgba(59, 130, 246, 0.32);
+    }
+    .node-split {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        background: rgba(0, 0, 0, 0.22);
+        border: 1px dashed rgba(255, 255, 255, 0.22);
+        border-radius: 10px;
+        padding: 10px;
+        gap: 10px;
+        min-width: 0;
+        min-height: 0;
+    }
+    .split-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 0.82rem;
+    }
+    .split-title {
+        font-weight: 600;
+        color: #e2e8f0 !important;
+        white-space: nowrap;
+        font-size: 0.8rem;
+    }
+    .ratio-label {
+        color: #38bdf8 !important;
+        font-weight: 700;
+    }
+    .split-slider {
+        flex: 1;
+        height: 6px;
+        accent-color: #38bdf8;
+        cursor: ew-resize;
+    }
+    .unsplit-btn {
+        background: rgba(239, 68, 68, 0.22);
+        border: 1px solid rgba(239, 68, 68, 0.5);
+        color: #f87171;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+    .unsplit-btn:hover {
+        background: rgba(239, 68, 68, 0.38);
+    }
+    .split-children {
+        display: flex;
+        flex: 1;
+        gap: 10px;
+        min-width: 0;
+        min-height: 0;
+    }
+    .split-children.horizontal {
+        flex-direction: row;
+    }
+    .split-children.vertical {
+        flex-direction: column;
+    }
 </style>
 
-<!-- SECTION 1: Layout & Display Appearance -->
+<!-- SECTION 1: Interactive Screen Layout Builder (Idea C) -->
 <div class="config-section">
-    <div class="config-section-title">🎨 Layout & Appearance</div>
-    
-    <div class="form-group">
-        <label for="layoutPreset" class="form-label">Layout Template:</label>
-        <select id="layoutPreset" name="layoutPreset" class="form-input" onchange="updateSlotHints()">
-            <option value="left_sidebar" selected>Left Sidebar + Split Main (25% / 75%)</option>
-            <option value="right_sidebar">Right Sidebar + Split Main (75% / 25%)</option>
-            <option value="even_split">Even Split (50% / 50%)</option>
-            <option value="three_column">Three Column Grid (33% / 33% / 33%)</option>
-            <option value="top_banner">Top Banner + Bottom Split</option>
-        </select>
-    </div>
+    <div class="config-section-title">✂️ Interactive Screen Splitter & Zones</div>
+    <div class="slot-hint">Click <b>Split L/R</b> or <b>Split T/B</b> on any zone to divide your display. Drag sliders to adjust boundary proportions live!</div>
+
+    <input type="hidden" id="layoutTree" name="layoutTree" value="" />
+    <div id="treeBuilderContainer" class="tree-builder-container"></div>
+</div>
+
+<!-- SECTION 2: Global Display Appearance -->
+<div class="config-section">
+    <div class="config-section-title">🎨 Global Display Appearance</div>
 
     <div class="config-grid-2">
         <div class="form-group">
@@ -122,57 +250,6 @@
             <label for="dividerThickness" class="form-label">Divider Thickness (px):</label>
             <input type="number" id="dividerThickness" name="dividerThickness" class="form-input" min="1" max="8" value="4" />
         </div>
-    </div>
-</div>
-
-<!-- SECTION 2: Widget Slot Assignments -->
-<div class="config-section">
-    <div class="config-section-title">🧩 Widget Slot Assignments</div>
-    <div id="slotHintBox" class="slot-hint">Assign widgets to display in each area of your layout.</div>
-
-    <div class="form-group">
-        <label id="labelSlot1" for="slot1Widget" class="form-label">Slot 1 Widget:</label>
-        <select id="slot1Widget" name="slot1Widget" class="form-input" onchange="updateDynamicVisibility()">
-            <option value="timeline" selected>Daily Timeline Grid</option>
-            <option value="agenda">Upcoming Agenda List</option>
-            <option value="month">Monthly Calendar</option>
-            <option value="weather">Weather Forecast</option>
-            <option value="todo">To-Do Task List</option>
-            <option value="clock">Clock Header</option>
-            <option value="wpotd">Wikipedia Picture of the Day</option>
-            <option value="comic">Daily Comic</option>
-            <option value="none">None (Disabled)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label id="labelSlot2" for="slot2Widget" class="form-label">Slot 2 Widget:</label>
-        <select id="slot2Widget" name="slot2Widget" class="form-input" onchange="updateDynamicVisibility()">
-            <option value="timeline">Daily Timeline Grid</option>
-            <option value="agenda">Upcoming Agenda List</option>
-            <option value="month" selected>Monthly Calendar</option>
-            <option value="weather">Weather Forecast</option>
-            <option value="todo">To-Do Task List</option>
-            <option value="clock">Clock Header</option>
-            <option value="wpotd">Wikipedia Picture of the Day</option>
-            <option value="comic">Daily Comic</option>
-            <option value="none">None (Disabled)</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label id="labelSlot3" for="slot3Widget" class="form-label">Slot 3 Widget:</label>
-        <select id="slot3Widget" name="slot3Widget" class="form-input" onchange="updateDynamicVisibility()">
-            <option value="timeline">Daily Timeline Grid</option>
-            <option value="agenda">Upcoming Agenda List</option>
-            <option value="month">Monthly Calendar</option>
-            <option value="weather" selected>Weather Forecast</option>
-            <option value="todo">To-Do Task List</option>
-            <option value="clock">Clock Header</option>
-            <option value="wpotd">Wikipedia Picture of the Day</option>
-            <option value="comic">Daily Comic</option>
-            <option value="none">None (Disabled)</option>
-        </select>
     </div>
 </div>
 
@@ -220,7 +297,6 @@
             <option value="full" selected>Full (Graph & 5-Day Forecast)</option>
             <option value="hourly">Hourly Graph Only</option>
             <option value="forecast">5-Day Forecast Only</option>
-            <option value="none">None (Disabled)</option>
         </select>
     </div>
 
@@ -285,63 +361,190 @@ Update dashboard</textarea>
 </div>
 
 <script>
-    function updateSlotHints() {
-        const preset = document.getElementById('layoutPreset').value;
-        const hintBox = document.getElementById('slotHintBox');
-        const l1 = document.getElementById('labelSlot1');
-        const l2 = document.getElementById('labelSlot2');
-        const l3 = document.getElementById('labelSlot3');
+    let nodeCounter = 100;
+    let currentLayoutTree = null;
 
-        if (preset === 'left_sidebar') {
-            hintBox.innerText = 'Left Sidebar (25% width) + Split Main area on the right.';
-            l1.innerText = 'Slot 1 (Left Sidebar):';
-            l2.innerText = 'Slot 2 (Top Right):';
-            l3.innerText = 'Slot 3 (Bottom Right):';
-        } else if (preset === 'right_sidebar') {
-            hintBox.innerText = 'Split Main area on the left + Right Sidebar (25% width).';
-            l1.innerText = 'Slot 1 (Right Sidebar):';
-            l2.innerText = 'Slot 2 (Top Left):';
-            l3.innerText = 'Slot 3 (Bottom Left):';
-        } else if (preset === 'even_split') {
-            hintBox.innerText = 'Two side-by-side columns split evenly (50% / 50%). Slot 3 is unused.';
-            l1.innerText = 'Slot 1 (Left Half):';
-            l2.innerText = 'Slot 2 (Right Half):';
-            l3.innerText = 'Slot 3 (Unused):';
-        } else if (preset === 'three_column') {
-            hintBox.innerText = 'Three vertical columns split evenly across the display.';
-            l1.innerText = 'Slot 1 (Left Column):';
-            l2.innerText = 'Slot 2 (Center Column):';
-            l3.innerText = 'Slot 3 (Right Column):';
-        } else if (preset === 'top_banner') {
-            hintBox.innerText = 'Full width Top Banner (25% height) + Two side-by-side slots below.';
-            l1.innerText = 'Slot 1 (Top Banner):';
-            l2.innerText = 'Slot 2 (Bottom Left):';
-            l3.innerText = 'Slot 3 (Bottom Right):';
+    function getDefaultTree() {
+        return {
+            id: "root",
+            type: "split",
+            direction: "horizontal",
+            splitRatio: 25,
+            first: { id: "n1", type: "widget", widget: "timeline" },
+            second: {
+                id: "n2",
+                type: "split",
+                direction: "vertical",
+                splitRatio: 66,
+                first: { id: "n3", type: "widget", widget: "month" },
+                second: { id: "n4", type: "widget", widget: "weather" }
+            }
+        };
+    }
+
+    function findNode(root, id) {
+        if (!root) return null;
+        if (root.id === id) return root;
+        if (root.type === 'split') {
+            return findNode(root.first, id) || findNode(root.second, id);
+        }
+        return null;
+    }
+
+    function getActiveWidgets(node) {
+        if (!node) return [];
+        if (node.type === 'widget') return [node.widget];
+        return [...getActiveWidgets(node.first), ...getActiveWidgets(node.second)];
+    }
+
+    function saveAndRenderTree() {
+        const input = document.getElementById('layoutTree');
+        if (input) {
+            input.value = JSON.stringify(currentLayoutTree);
+        }
+        const container = document.getElementById('treeBuilderContainer');
+        if (container) {
+            container.innerHTML = renderNodeHTML(currentLayoutTree);
+        }
+        updateDynamicVisibility();
+    }
+
+    function splitNode(id, direction) {
+        const target = findNode(currentLayoutTree, id);
+        if (!target) return;
+        const oldWidget = target.widget || 'timeline';
+        
+        nodeCounter++;
+        const id1 = 'node_' + nodeCounter;
+        nodeCounter++;
+        const id2 = 'node_' + nodeCounter;
+
+        target.type = 'split';
+        target.direction = direction;
+        target.splitRatio = 50;
+        delete target.widget;
+
+        target.first = { id: id1, type: 'widget', widget: oldWidget };
+        target.second = { id: id2, type: 'widget', widget: 'month' };
+
+        saveAndRenderTree();
+    }
+
+    function unsplitNode(id) {
+        const target = findNode(currentLayoutTree, id);
+        if (!target || target.type !== 'split') return;
+        
+        const survivorWidget = (target.first && target.first.widget) ? target.first.widget : 'timeline';
+        target.type = 'widget';
+        target.widget = survivorWidget;
+        delete target.direction;
+        delete target.splitRatio;
+        delete target.first;
+        delete target.second;
+
+        saveAndRenderTree();
+    }
+
+    function updateNodeWidget(id, val) {
+        const target = findNode(currentLayoutTree, id);
+        if (!target) return;
+        target.widget = val;
+        saveAndRenderTree();
+    }
+
+    function updateSplitRatio(id, val) {
+        const target = findNode(currentLayoutTree, id);
+        if (!target) return;
+        const ratio = parseInt(val, 10);
+        target.splitRatio = ratio;
+
+        const el = document.querySelector(`[data-split-id="${id}"]`);
+        if (el) {
+            const lbl = el.querySelector('.ratio-label');
+            if (lbl) lbl.innerText = `${ratio}% / ${100 - ratio}%`;
+            const c1 = el.querySelector(':scope > .split-children > .child-first');
+            const c2 = el.querySelector(':scope > .split-children > .child-second');
+            if (c1 && c2) {
+                c1.style.flex = ratio;
+                c2.style.flex = 100 - ratio;
+            }
+        }
+        document.getElementById('layoutTree').value = JSON.stringify(currentLayoutTree);
+    }
+
+    function renderNodeHTML(node) {
+        if (!node) return '';
+        if (node.type === 'split') {
+            const dirClass = node.direction === 'vertical' ? 'vertical' : 'horizontal';
+            const ratio = node.splitRatio || 50;
+            const icon = node.direction === 'vertical' ? '↕️ Stack' : '↔️ Split';
+            
+            return `
+                <div class="node-split ${dirClass}" data-split-id="${node.id}">
+                    <div class="split-header">
+                        <span class="split-title">${icon} (<span class="ratio-label">${ratio}% / ${100 - ratio}%</span>)</span>
+                        <input type="range" min="10" max="90" value="${ratio}" class="split-slider"
+                               oninput="updateSplitRatio('${node.id}', this.value)"
+                               onchange="saveAndRenderTree()" />
+                        <button type="button" class="unsplit-btn" onclick="unsplitNode('${node.id}')">✕ Unsplit</button>
+                    </div>
+                    <div class="split-children ${dirClass}">
+                        <div class="child-first" style="flex: ${ratio}; display: flex; min-width: 0; min-height: 0;">
+                            ${renderNodeHTML(node.first)}
+                        </div>
+                        <div class="child-second" style="flex: ${100 - ratio}; display: flex; min-width: 0; min-height: 0;">
+                            ${renderNodeHTML(node.second)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        } else {
+            const w = node.widget || 'timeline';
+            const opts = [
+                {val: 'timeline', name: 'Daily Timeline Grid'},
+                {val: 'agenda', name: 'Upcoming Agenda List'},
+                {val: 'month', name: 'Monthly Calendar'},
+                {val: 'weather', name: 'Weather Forecast'},
+                {val: 'todo', name: 'To-Do Task List'},
+                {val: 'clock', name: 'Clock Header'},
+                {val: 'wpotd', name: 'Wikipedia POTD'},
+                {val: 'comic', name: 'Daily Comic'},
+                {val: 'none', name: 'None (Blank Area)'}
+            ].map(o => `<option value="${o.val}" ${o.val === w ? 'selected' : ''}>${o.name}</option>`).join('');
+
+            return `
+                <div class="node-widget">
+                    <div class="widget-header">
+                        <span class="widget-label">🧩 Screen Zone</span>
+                        <select class="widget-select" onchange="updateNodeWidget('${node.id}', this.value)">
+                            ${opts}
+                        </select>
+                    </div>
+                    <div class="widget-actions">
+                        <button type="button" class="action-btn" onclick="splitNode('${node.id}', 'horizontal')">✂️ Split L/R</button>
+                        <button type="button" class="action-btn" onclick="splitNode('${node.id}', 'vertical')">✂️ Split T/B</button>
+                    </div>
+                </div>
+            `;
         }
     }
 
     function updateDynamicVisibility() {
-        const s1 = document.getElementById('slot1Widget').value;
-        const s2 = document.getElementById('slot2Widget').value;
-        const s3 = document.getElementById('slot3Widget').value;
-        const selected = [s1, s2, s3];
+        const active = getActiveWidgets(currentLayoutTree);
 
-        const hasTimeline = selected.includes('timeline');
-        const hasCalendar = selected.some(w => ['timeline', 'agenda', 'month'].includes(w));
-        const hasWeather = selected.includes('weather');
-        const hasTodo = selected.includes('todo');
-        const hasClock = selected.includes('clock');
-        const hasComic = selected.includes('comic');
+        const hasTimeline = active.includes('timeline');
+        const hasCalendar = active.some(w => ['timeline', 'agenda', 'month'].includes(w));
+        const hasWeather = active.includes('weather');
+        const hasTodo = active.includes('todo');
+        const hasClock = active.includes('clock');
+        const hasComic = active.includes('comic');
 
-        // Section 3: Calendar & Timeline
         document.getElementById('sectionCalendar').style.display = hasCalendar ? 'block' : 'none';
         document.getElementById('groupTimelineDuration').style.display = hasTimeline ? 'block' : 'none';
         document.getElementById('groupTimelineHours').style.display = hasTimeline ? 'block' : 'none';
 
-        // Section 4: Weather
         document.getElementById('sectionWeather').style.display = hasWeather ? 'block' : 'none';
 
-        // Section 5: Extras
         const hasExtras = hasTodo || hasClock || hasComic;
         document.getElementById('sectionExtras').style.display = hasExtras ? 'block' : 'none';
         document.getElementById('groupTodoTitle').style.display = hasTodo ? 'block' : 'none';
@@ -398,12 +601,17 @@ Update dashboard</textarea>
                 }));
             }
 
+            if (pluginSettings.layoutTree) {
+                try {
+                    currentLayoutTree = typeof pluginSettings.layoutTree === 'string' ? JSON.parse(pluginSettings.layoutTree) : pluginSettings.layoutTree;
+                } catch(e) { console.warn(e); }
+            }
+
             const fields = [
-                'layoutPreset', 'themeMode', 'fontSize', 'showDividers', 'dividerThickness',
-                'slot1Widget', 'slot2Widget', 'slot3Widget', 'timelineDays',
-                'startTimeInterval', 'endTimeInterval', 'weatherLayout',
-                'latitude', 'longitude', 'units', 'todoTitle', 'todoItems',
-                'clockFace', 'comicSelection'
+                'themeMode', 'fontSize', 'showDividers', 'dividerThickness',
+                'timelineDays', 'startTimeInterval', 'endTimeInterval',
+                'weatherLayout', 'latitude', 'longitude', 'units',
+                'todoTitle', 'todoItems', 'clockFace', 'comicSelection'
             ];
 
             fields.forEach(f => {
@@ -412,20 +620,16 @@ Update dashboard</textarea>
                     el.value = pluginSettings[f];
                 }
             });
+        }
 
-            if (pluginSettings.slot3Widget === undefined && pluginSettings.weatherLayout) {
-                const s3 = document.getElementById('slot3Widget');
-                if (s3) {
-                    s3.value = pluginSettings.weatherLayout === 'none' ? 'none' : 'weather';
-                }
-            }
+        if (!currentLayoutTree) {
+            currentLayoutTree = getDefaultTree();
         }
 
         calendars.forEach(({ url, color }) => {
             addCalendarInput(url, color);
         });
 
-        updateSlotHints();
-        updateDynamicVisibility();
+        saveAndRenderTree();
     });
 </script>

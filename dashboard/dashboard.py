@@ -3,6 +3,7 @@ from plugins.calendar.calendar import Calendar
 from plugins.weather.weather import Weather
 from PIL import Image, ImageDraw, ImageOps
 import logging
+import json
 from datetime import datetime, timedelta
 import pytz
 
@@ -51,14 +52,11 @@ class OffsetCalendar(Calendar):
 
 class Dashboard(BasePlugin):
     def generate_image(self, settings, device_config):
-        # Target display size, handling display orientation from device config
         dimensions = device_config.get_resolution()
         if device_config.get_config("orientation") == "vertical":
             dimensions = dimensions[::-1]
         width, height = dimensions
 
-        # 1. Layout & Theme Configuration
-        layout_preset = settings.get('layoutPreset', 'left_sidebar')
         theme_mode = settings.get('themeMode', 'light')
         show_dividers = settings.get('showDividers', 'true') == 'true'
         try:
@@ -66,39 +64,9 @@ class Dashboard(BasePlugin):
         except (ValueError, TypeError):
             divider_thickness = 4
 
-        slot1_widget = settings.get('slot1Widget', 'timeline')
-        slot2_widget = settings.get('slot2Widget', 'month')
-        slot3_widget = settings.get('slot3Widget')
-        
-        # Backward compatibility with old weatherLayout settings
-        if not slot3_widget:
-            if settings.get('weatherLayout') == 'none':
-                slot3_widget = 'none'
-            else:
-                slot3_widget = 'weather'
-
         bg_color = "white" if theme_mode != 'cards' else "#e4e4e7"
         dashboard_image = Image.new("RGB", (width, height), bg_color)
 
-        # Utility class to mock device configuration for child plugins
-        class MockDeviceConfig:
-            def __init__(self, original_config, w, h):
-                self.original_config = original_config
-                self.w = w
-                self.h = h
-
-            def get_resolution(self):
-                return (self.w, self.h)
-
-            def get_config(self, key, default=None):
-                if key == "orientation":
-                    return "horizontal"
-                return self.original_config.get_config(key, default)
-                
-            def load_env_key(self, key):
-                return self.original_config.load_env_key(key)
-
-        # 2. Shared Data Sources (Calendars & Timezone)
         urls = settings.get('calendarURLs[]')
         colors = settings.get('calendarColors[]')
         if not urls:
@@ -111,85 +79,158 @@ class Dashboard(BasePlugin):
         tz = pytz.timezone(settings.get("timezone", "UTC"))
         font_size = settings.get('fontSize', 'normal')
 
-        # Dynamic Timeline Range Calculation
-        min_hour, max_hour = self.calculate_timeline_hours(settings, urls, colors, tz)
+        # 1. Resolve Layout Tree
+        tree_root = self.get_layout_tree(settings)
 
-        # 3. Calculate Slot Geometries: list of (widget_type, x, y, w, h)
-        slots = []
-        if layout_preset == 'left_sidebar':
-            s1_w = width // 4
-            s2_w = width - s1_w
-            if slot3_widget == 'none':
-                slots = [
-                    (slot1_widget, 0, 0, s1_w, height),
-                    (slot2_widget, s1_w, 0, s2_w, height)
-                ]
-            else:
-                s2_h = (height * 2) // 3
-                s3_h = height - s2_h
-                slots = [
-                    (slot1_widget, 0, 0, s1_w, height),
-                    (slot2_widget, s1_w, 0, s2_w, s2_h),
-                    (slot3_widget, s1_w, s2_h, s2_w, s3_h)
-                ]
-        elif layout_preset == 'right_sidebar':
-            s3_w = width // 4
-            main_w = width - s3_w
-            if slot3_widget == 'none':
-                slots = [
-                    (slot1_widget, main_w, 0, s3_w, height),
-                    (slot2_widget, 0, 0, main_w, height)
-                ]
-            else:
-                s1_h = (height * 2) // 3
-                s2_h = height - s1_h
-                slots = [
-                    (slot1_widget, main_w, 0, s3_w, height),
-                    (slot2_widget, 0, 0, main_w, s1_h),
-                    (slot3_widget, 0, s1_h, main_w, s2_h)
-                ]
-        elif layout_preset == 'even_split':
-            if slot2_widget == 'none':
-                slots = [(slot1_widget, 0, 0, width, height)]
-            else:
-                half_w = width // 2
-                slots = [
-                    (slot1_widget, 0, 0, half_w, height),
-                    (slot2_widget, half_w, 0, width - half_w, height)
-                ]
-        elif layout_preset == 'three_column':
-            c1_w = width // 3
-            c2_w = width // 3
-            c3_w = width - c1_w - c2_w
-            slots = [
-                (slot1_widget, 0, 0, c1_w, height),
-                (slot2_widget, c1_w, 0, c2_w, height),
-                (slot3_widget, c1_w + c2_w, 0, c3_w, height)
-            ]
-        elif layout_preset == 'top_banner':
-            banner_h = height // 4
-            bot_h = height - banner_h
-            if slot3_widget == 'none':
-                slots = [
-                    (slot1_widget, 0, 0, width, banner_h),
-                    (slot2_widget, 0, banner_h, width, bot_h)
-                ]
-            else:
-                half_w = width // 2
-                slots = [
-                    (slot1_widget, 0, 0, width, banner_h),
-                    (slot2_widget, 0, banner_h, half_w, bot_h),
-                    (slot3_widget, half_w, banner_h, width - half_w, bot_h)
-                ]
+        # 2. Dynamic Timeline Range Calculation (only if timeline widget is in tree)
+        active_widgets = self.get_active_widgets(tree_root)
+        if 'timeline' in active_widgets:
+            min_hour, max_hour = self.calculate_timeline_hours(settings, urls, colors, tz)
+        else:
+            min_hour, max_hour = 6, 22
 
-        # 4. Render and Paste Widgets
-        for widget_type, sx, sy, sw, sh in slots:
-            if sw <= 0 or sh <= 0 or widget_type == 'none' or not widget_type:
-                continue
+        # 3. Recursively Render Tree onto Dashboard Canvas
+        self.render_node(
+            tree_root, 0, 0, width, height, settings, device_config,
+            urls, colors, tz, min_hour, max_hour, font_size, theme_mode,
+            dashboard_image, show_dividers, divider_thickness
+        )
+
+        # 4. Apply Theme Inversion for Dark Mode
+        if theme_mode == 'dark':
+            dashboard_image = ImageOps.invert(dashboard_image)
+
+        return dashboard_image
+
+    def get_active_widgets(self, node):
+        if not node:
+            return []
+        if node.get("type") == "widget":
+            return [node.get("widget")]
+        return self.get_active_widgets(node.get("first")) + self.get_active_widgets(node.get("second"))
+
+    def get_layout_tree(self, settings):
+        tree_str = settings.get('layoutTree')
+        if tree_str:
+            try:
+                return json.loads(tree_str)
+            except Exception as e:
+                logger.warning(f"Failed to parse layoutTree JSON: {e}")
+
+        # Fallback / Migration from legacy preset settings
+        preset = settings.get('layoutPreset', 'left_sidebar')
+        s1 = settings.get('slot1Widget', 'timeline')
+        s2 = settings.get('slot2Widget', 'month')
+        s3 = settings.get('slot3Widget')
+        if not s3:
+            s3 = 'none' if settings.get('weatherLayout') == 'none' else 'weather'
+
+        if preset == 'even_split':
+            return {
+                "id": "root", "type": "split", "direction": "horizontal", "splitRatio": 50,
+                "first": {"id": "n1", "type": "widget", "widget": s1},
+                "second": {"id": "n2", "type": "widget", "widget": s2}
+            }
+        elif preset == 'three_column':
+            return {
+                "id": "root", "type": "split", "direction": "horizontal", "splitRatio": 33,
+                "first": {"id": "n1", "type": "widget", "widget": s1},
+                "second": {
+                    "id": "n2", "type": "split", "direction": "horizontal", "splitRatio": 50,
+                    "first": {"id": "n3", "type": "widget", "widget": s2},
+                    "second": {"id": "n4", "type": "widget", "widget": s3}
+                }
+            }
+        elif preset == 'right_sidebar':
+            if s3 == 'none':
+                return {
+                    "id": "root", "type": "split", "direction": "horizontal", "splitRatio": 75,
+                    "first": {"id": "n1", "type": "widget", "widget": s2},
+                    "second": {"id": "n2", "type": "widget", "widget": s1}
+                }
+            return {
+                "id": "root", "type": "split", "direction": "horizontal", "splitRatio": 75,
+                "first": {
+                    "id": "n1", "type": "split", "direction": "vertical", "splitRatio": 66,
+                    "first": {"id": "n2", "type": "widget", "widget": s2},
+                    "second": {"id": "n3", "type": "widget", "widget": s3}
+                },
+                "second": {"id": "n4", "type": "widget", "widget": s1}
+            }
+        elif preset == 'top_banner':
+            if s3 == 'none':
+                return {
+                    "id": "root", "type": "split", "direction": "vertical", "splitRatio": 25,
+                    "first": {"id": "n1", "type": "widget", "widget": s1},
+                    "second": {"id": "n2", "type": "widget", "widget": s2}
+                }
+            return {
+                "id": "root", "type": "split", "direction": "vertical", "splitRatio": 25,
+                "first": {"id": "n1", "type": "widget", "widget": s1},
+                "second": {
+                    "id": "n2", "type": "split", "direction": "horizontal", "splitRatio": 50,
+                    "first": {"id": "n3", "type": "widget", "widget": s2},
+                    "second": {"id": "n4", "type": "widget", "widget": s3}
+                }
+            }
+        else: # left_sidebar default
+            if s3 == 'none':
+                return {
+                    "id": "root", "type": "split", "direction": "horizontal", "splitRatio": 25,
+                    "first": {"id": "n1", "type": "widget", "widget": s1},
+                    "second": {"id": "n2", "type": "widget", "widget": s2}
+                }
+            return {
+                "id": "root", "type": "split", "direction": "horizontal", "splitRatio": 25,
+                "first": {"id": "n1", "type": "widget", "widget": s1},
+                "second": {
+                    "id": "n2", "type": "split", "direction": "vertical", "splitRatio": 66,
+                    "first": {"id": "n3", "type": "widget", "widget": s2},
+                    "second": {"id": "n4", "type": "widget", "widget": s3}
+                }
+            }
+
+    def render_node(self, node, x, y, w, h, settings, device_config, urls, colors, tz, min_hour, max_hour, font_size, theme_mode, dashboard_image, show_dividers, divider_thickness):
+        if w <= 0 or h <= 0 or not node:
+            return
+
+        node_type = node.get("type", "widget")
+        if node_type == "split":
+            direction = node.get("direction", "horizontal")
+            try:
+                ratio = float(node.get("splitRatio", 50)) / 100.0
+            except (ValueError, TypeError):
+                ratio = 0.5
+            ratio = max(0.05, min(0.95, ratio))
+
+            first = node.get("first")
+            second = node.get("second")
+
+            if direction == "horizontal":
+                w1 = int(w * ratio)
+                w2 = w - w1
+                self.render_node(first, x, y, w1, h, settings, device_config, urls, colors, tz, min_hour, max_hour, font_size, theme_mode, dashboard_image, show_dividers, divider_thickness)
+                self.render_node(second, x + w1, y, w2, h, settings, device_config, urls, colors, tz, min_hour, max_hour, font_size, theme_mode, dashboard_image, show_dividers, divider_thickness)
+                if show_dividers and theme_mode != 'cards':
+                    draw = ImageDraw.Draw(dashboard_image)
+                    draw.line([(x + w1, y), (x + w1, y + h)], fill="black", width=divider_thickness)
+            else:
+                h1 = int(h * ratio)
+                h2 = h - h1
+                self.render_node(first, x, y, w, h1, settings, device_config, urls, colors, tz, min_hour, max_hour, font_size, theme_mode, dashboard_image, show_dividers, divider_thickness)
+                self.render_node(second, x, y + h1, w, h2, settings, device_config, urls, colors, tz, min_hour, max_hour, font_size, theme_mode, dashboard_image, show_dividers, divider_thickness)
+                if show_dividers and theme_mode != 'cards':
+                    draw = ImageDraw.Draw(dashboard_image)
+                    draw.line([(x, y + h1), (x + w, y + h1)], fill="black", width=divider_thickness)
+
+        else:
+            widget_type = node.get("widget", "none")
+            if widget_type == "none" or not widget_type:
+                return
 
             pad = 8 if theme_mode == 'cards' else 0
-            target_w = max(1, sw - 2 * pad)
-            target_h = max(1, sh - 2 * pad)
+            target_w = max(1, w - 2 * pad)
+            target_h = max(1, h - 2 * pad)
 
             widget_img = self.generate_widget_image(
                 widget_type, target_w, target_h, settings, device_config,
@@ -201,48 +242,9 @@ class Dashboard(BasePlugin):
                     mask = Image.new("L", (target_w, target_h), 0)
                     mask_draw = ImageDraw.Draw(mask)
                     mask_draw.rounded_rectangle((0, 0, target_w, target_h), radius=12, fill=255)
-                    dashboard_image.paste(widget_img, (sx + pad, sy + pad), mask=mask)
+                    dashboard_image.paste(widget_img, (x + pad, y + pad), mask=mask)
                 else:
-                    dashboard_image.paste(widget_img, (sx, sy))
-
-        # 5. Draw Dividing Lines (if applicable)
-        if show_dividers and theme_mode != 'cards':
-            draw = ImageDraw.Draw(dashboard_image)
-            line_color = "black"
-            lw = divider_thickness
-
-            if layout_preset == 'left_sidebar':
-                x_split = width // 4
-                draw.line([(x_split, 0), (x_split, height)], fill=line_color, width=lw)
-                if slot3_widget != 'none':
-                    y_split = (height * 2) // 3
-                    draw.line([(x_split, y_split), (width, y_split)], fill=line_color, width=lw)
-            elif layout_preset == 'right_sidebar':
-                x_split = width - width // 4
-                draw.line([(x_split, 0), (x_split, height)], fill=line_color, width=lw)
-                if slot3_widget != 'none':
-                    y_split = (height * 2) // 3
-                    draw.line([(0, y_split), (x_split, y_split)], fill=line_color, width=lw)
-            elif layout_preset == 'even_split' and slot2_widget != 'none':
-                x_split = width // 2
-                draw.line([(x_split, 0), (x_split, height)], fill=line_color, width=lw)
-            elif layout_preset == 'three_column':
-                c1_w = width // 3
-                c2_w = width // 3
-                draw.line([(c1_w, 0), (c1_w, height)], fill=line_color, width=lw)
-                draw.line([(c1_w + c2_w, 0), (c1_w + c2_w, height)], fill=line_color, width=lw)
-            elif layout_preset == 'top_banner':
-                banner_h = height // 4
-                draw.line([(0, banner_h), (width, banner_h)], fill=line_color, width=lw)
-                if slot3_widget != 'none':
-                    half_w = width // 2
-                    draw.line([(half_w, banner_h), (half_w, height)], fill=line_color, width=lw)
-
-        # 6. Apply Theme Inversion for Dark Mode
-        if theme_mode == 'dark':
-            dashboard_image = ImageOps.invert(dashboard_image)
-
-        return dashboard_image
+                    dashboard_image.paste(widget_img, (x, y))
 
     def calculate_timeline_hours(self, settings, urls, colors, tz):
         user_start = int(settings.get('startTimeInterval', '6'))
