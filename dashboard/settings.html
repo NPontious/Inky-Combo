@@ -63,16 +63,6 @@
     .remove-btn:hover {
         background: rgba(239, 68, 68, 0.3);
     }
-    .slot-hint {
-        font-size: 0.88rem;
-        color: #e2e8f0;
-        margin-bottom: 14px;
-        background: rgba(59, 130, 246, 0.18);
-        padding: 10px 14px;
-        border-radius: 8px;
-        border-left: 3px solid #3b82f6;
-        line-height: 1.4;
-    }
 
     /* Interactive Layout Splitter Tree Styles */
     .tree-builder-container {
@@ -206,8 +196,7 @@
 
 <!-- SECTION 1: Interactive Screen Layout Builder (Idea C) -->
 <div class="config-section">
-    <div class="config-section-title">✂️ Interactive Screen Splitter & Zones</div>
-    <div class="slot-hint">Click <b>Split L/R</b> or <b>Split T/B</b> on any zone to divide your display. Drag sliders to adjust boundary proportions live!</div>
+    <div class="config-section-title">Screen Layout & Zones</div>
 
     <input type="hidden" id="layoutTree" name="layoutTree" value="" />
     <div id="treeBuilderContainer" class="tree-builder-container"></div>
@@ -215,7 +204,7 @@
 
 <!-- SECTION 2: Global Display Appearance -->
 <div class="config-section">
-    <div class="config-section-title">🎨 Global Display Appearance</div>
+    <div class="config-section-title">Global Display Appearance</div>
 
     <div class="config-grid-2">
         <div class="form-group">
@@ -255,7 +244,7 @@
 
 <!-- SECTION 3: Calendar & Schedule Settings -->
 <div id="sectionCalendar" class="config-section">
-    <div class="config-section-title">📅 Calendar & Timeline Configuration</div>
+    <div class="config-section-title">Calendar & Timeline Configuration</div>
 
     <div id="groupTimelineDuration" class="form-group">
         <label for="timelineDays" class="form-label">Timeline Duration:</label>
@@ -283,13 +272,13 @@
     <div class="form-group">
         <label class="form-label">iCal Calendar URLs:</label>
         <div id="calendarList"></div>
-        <button type="button" id="addCalendarBtn" class="form-input collapsible" style="margin-top: 8px;" onclick="addCalendarInput('', '#000000')">➕ Add Calendar URL</button>
+        <button type="button" id="addCalendarBtn" class="form-input collapsible" style="margin-top: 8px;" onclick="addCalendarInput('', '#000000')">Add Calendar URL</button>
     </div>
 </div>
 
 <!-- SECTION 4: Weather Settings -->
 <div id="sectionWeather" class="config-section">
-    <div class="config-section-title">⛅ Weather Configuration</div>
+    <div class="config-section-title">Weather Configuration</div>
 
     <div class="form-group">
         <label for="weatherLayout" class="form-label">Weather Details Mode:</label>
@@ -323,7 +312,7 @@
 
 <!-- SECTION 5: To-Do & Extra Widgets Configuration -->
 <div id="sectionExtras" class="config-section">
-    <div class="config-section-title">📝 To-Do & Extra Widgets Settings</div>
+    <div class="config-section-title">To-Do & Extra Widgets Settings</div>
 
     <div id="groupTodoTitle" class="form-group">
         <label for="todoTitle" class="form-label">To-Do List Header Title:</label>
@@ -477,7 +466,7 @@ Update dashboard</textarea>
         if (node.type === 'split') {
             const dirClass = node.direction === 'vertical' ? 'vertical' : 'horizontal';
             const ratio = node.splitRatio || 50;
-            const icon = node.direction === 'vertical' ? '↕️ Stack' : '↔️ Split';
+            const icon = node.direction === 'vertical' ? 'Stacked' : 'Split';
             
             return `
                 <div class="node-split ${dirClass}" data-split-id="${node.id}">
@@ -486,7 +475,7 @@ Update dashboard</textarea>
                         <input type="range" min="10" max="90" value="${ratio}" class="split-slider"
                                oninput="updateSplitRatio('${node.id}', this.value)"
                                onchange="saveAndRenderTree()" />
-                        <button type="button" class="unsplit-btn" onclick="unsplitNode('${node.id}')">✕ Unsplit</button>
+                        <button type="button" class="unsplit-btn" onclick="unsplitNode('${node.id}')">Unsplit</button>
                     </div>
                     <div class="split-children ${dirClass}">
                         <div class="child-first" style="flex: ${ratio}; display: flex; min-width: 0; min-height: 0;">
@@ -515,14 +504,14 @@ Update dashboard</textarea>
             return `
                 <div class="node-widget">
                     <div class="widget-header">
-                        <span class="widget-label">🧩 Screen Zone</span>
+                        <span class="widget-label">Screen Zone</span>
                         <select class="widget-select" onchange="updateNodeWidget('${node.id}', this.value)">
                             ${opts}
                         </select>
                     </div>
                     <div class="widget-actions">
-                        <button type="button" class="action-btn" onclick="splitNode('${node.id}', 'horizontal')">✂️ Split L/R</button>
-                        <button type="button" class="action-btn" onclick="splitNode('${node.id}', 'vertical')">✂️ Split T/B</button>
+                        <button type="button" class="action-btn" onclick="splitNode('${node.id}', 'horizontal')">Split L/R</button>
+                        <button type="button" class="action-btn" onclick="splitNode('${node.id}', 'vertical')">Split T/B</button>
                     </div>
                 </div>
             `;

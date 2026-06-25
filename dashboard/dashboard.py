@@ -1,9 +1,10 @@
-from plugins.base_plugin.base_plugin import BasePlugin
+from plugins.base_plugin.base_plugin import BasePlugin, BASE_PLUGIN_RENDER_DIR, STATIC_DIR, get_fonts, take_screenshot_html
 from plugins.calendar.calendar import Calendar
 from plugins.weather.weather import Weather
 from PIL import Image, ImageDraw, ImageOps
 import logging
 import json
+import os
 from datetime import datetime, timedelta
 import pytz
 
@@ -31,10 +32,11 @@ except ImportError:
 
 
 class OffsetCalendar(Calendar):
-    """Utility subclass to render calendar events offset by N days for multi-day timeline grids."""
-    def __init__(self, config, day_offset=0):
+    """Utility subclass to render calendar events offset by N days with optional time axis suppression."""
+    def __init__(self, config, day_offset=0, hide_time_axis=False):
         super().__init__(config)
         self.day_offset = day_offset
+        self.hide_time_axis = hide_time_axis
 
     def get_view_range(self, view, current_dt, settings):
         shifted_dt = current_dt + timedelta(days=self.day_offset)
@@ -47,7 +49,26 @@ class OffsetCalendar(Calendar):
                 template_params['current_dt'] = dt.isoformat()
             except Exception as e:
                 logger.warning(f"Failed to shift current_dt in OffsetCalendar: {e}")
-        return super().render_image(dimensions, html_file, css_file, template_params)
+
+        css_files = [os.path.join(BASE_PLUGIN_RENDER_DIR, "plugin.css")]
+        if css_file:
+            plugin_css = os.path.join(self.render_dir, css_file)
+            css_files.append(plugin_css)
+
+        template_params["style_sheets"] = css_files
+        template_params["width"] = dimensions[0]
+        template_params["height"] = dimensions[1]
+        template_params["font_faces"] = get_fonts()
+        template_params["static_dir"] = STATIC_DIR
+
+        template = self.env.get_template(html_file)
+        rendered_html = template.render(template_params)
+
+        if self.hide_time_axis:
+            hide_css = "<style>.fc-timegrid-axis { display: none !important; width: 0 !important; } .fc-timegrid-slot-label { display: none !important; }</style>"
+            rendered_html += hide_css
+
+        return take_screenshot_html(rendered_html, dimensions)
 
 
 class Dashboard(BasePlugin):
@@ -82,7 +103,7 @@ class Dashboard(BasePlugin):
         # 1. Resolve Layout Tree
         tree_root = self.get_layout_tree(settings)
 
-        # 2. Dynamic Timeline Range Calculation (only if timeline widget is in tree)
+        # 2. Dynamic Timeline Range Calculation
         active_widgets = self.get_active_widgets(tree_root)
         if 'timeline' in active_widgets:
             min_hour, max_hour = self.calculate_timeline_hours(settings, urls, colors, tz)
@@ -117,7 +138,6 @@ class Dashboard(BasePlugin):
             except Exception as e:
                 logger.warning(f"Failed to parse layoutTree JSON: {e}")
 
-        # Fallback / Migration from legacy preset settings
         preset = settings.get('layoutPreset', 'left_sidebar')
         s1 = settings.get('slot1Widget', 'timeline')
         s2 = settings.get('slot2Widget', 'month')
@@ -318,14 +338,28 @@ class Dashboard(BasePlugin):
                     return Calendar({"id": "calendar"}).generate_image(cal_settings, mock_config)
                 else:
                     combined_img = Image.new("RGB", (w, h), "white")
-                    day_w = w // timeline_days
+                    axis_w = 48 if w > 300 else 36
+                    day_event_w = max(1, (w - axis_w) // timeline_days)
+
+                    cur_x = 0
                     for i in range(timeline_days):
-                        cur_w = day_w if i < timeline_days - 1 else w - i * day_w
+                        if i == 0:
+                            cur_w = axis_w + day_event_w
+                            hide_axis = False
+                        elif i == timeline_days - 1:
+                            cur_w = max(1, w - cur_x)
+                            hide_axis = True
+                        else:
+                            cur_w = day_event_w
+                            hide_axis = True
+
                         sub_config = MockChildConfig(device_config, cur_w, h)
-                        sub_cal = OffsetCalendar({"id": "calendar"}, day_offset=i)
+                        sub_cal = OffsetCalendar({"id": "calendar"}, day_offset=i, hide_time_axis=hide_axis)
                         sub_img = sub_cal.generate_image(cal_settings, sub_config)
                         if sub_img:
-                            combined_img.paste(sub_img, (i * day_w, 0))
+                            combined_img.paste(sub_img, (cur_x, 0))
+                        cur_x += cur_w
+
                     return combined_img
 
             elif widget_type == 'agenda':
