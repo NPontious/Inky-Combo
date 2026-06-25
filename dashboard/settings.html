@@ -1,19 +1,25 @@
 <style>
+    @keyframes sectionFadeIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
     .config-section {
-        background: var(--card-bg, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
-        border-radius: 10px;
-        padding: 18px;
-        margin-bottom: 20px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        background: rgba(128, 128, 128, 0.08);
+        border: 1px solid rgba(128, 128, 128, 0.2);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 22px;
+        backdrop-filter: blur(8px);
+        animation: sectionFadeIn 0.25s ease-out;
+        transition: opacity 0.2s;
     }
     .config-section-title {
         font-size: 1.15rem;
         font-weight: 700;
-        color: var(--text-main, #1a202c);
-        margin-bottom: 14px;
+        color: inherit;
+        margin-bottom: 16px;
         padding-bottom: 8px;
-        border-bottom: 2px solid #f1f5f9;
+        border-bottom: 1px solid rgba(128, 128, 128, 0.2);
         display: flex;
         align-items: center;
         gap: 8px;
@@ -33,15 +39,15 @@
         width: 44px;
         height: 38px;
         padding: 2px;
-        border: 1px solid #cbd5e1;
+        border: 1px solid rgba(128, 128, 128, 0.3);
         border-radius: 6px;
         cursor: pointer;
         background: transparent;
     }
     .remove-btn {
-        background: #fee2e2;
-        border: 1px solid #f87171;
-        color: #b91c1c;
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #f87171;
         border-radius: 6px;
         width: 38px;
         height: 38px;
@@ -53,16 +59,18 @@
         transition: background 0.2s;
     }
     .remove-btn:hover {
-        background: #fecaca;
+        background: rgba(239, 68, 68, 0.25);
     }
     .slot-hint {
-        font-size: 0.85rem;
-        color: #64748b;
-        margin-bottom: 12px;
-        background: #f8fafc;
-        padding: 8px 12px;
-        border-radius: 6px;
+        font-size: 0.88rem;
+        color: inherit;
+        opacity: 0.85;
+        margin-bottom: 14px;
+        background: rgba(59, 130, 246, 0.15);
+        padding: 10px 14px;
+        border-radius: 8px;
         border-left: 3px solid #3b82f6;
+        line-height: 1.4;
     }
 </style>
 
@@ -124,7 +132,7 @@
 
     <div class="form-group">
         <label id="labelSlot1" for="slot1Widget" class="form-label">Slot 1 Widget:</label>
-        <select id="slot1Widget" name="slot1Widget" class="form-input">
+        <select id="slot1Widget" name="slot1Widget" class="form-input" onchange="updateDynamicVisibility()">
             <option value="timeline" selected>Daily Timeline Grid</option>
             <option value="agenda">Upcoming Agenda List</option>
             <option value="month">Monthly Calendar</option>
@@ -139,7 +147,7 @@
 
     <div class="form-group">
         <label id="labelSlot2" for="slot2Widget" class="form-label">Slot 2 Widget:</label>
-        <select id="slot2Widget" name="slot2Widget" class="form-input">
+        <select id="slot2Widget" name="slot2Widget" class="form-input" onchange="updateDynamicVisibility()">
             <option value="timeline">Daily Timeline Grid</option>
             <option value="agenda">Upcoming Agenda List</option>
             <option value="month" selected>Monthly Calendar</option>
@@ -154,7 +162,7 @@
 
     <div class="form-group">
         <label id="labelSlot3" for="slot3Widget" class="form-label">Slot 3 Widget:</label>
-        <select id="slot3Widget" name="slot3Widget" class="form-input">
+        <select id="slot3Widget" name="slot3Widget" class="form-input" onchange="updateDynamicVisibility()">
             <option value="timeline">Daily Timeline Grid</option>
             <option value="agenda">Upcoming Agenda List</option>
             <option value="month">Monthly Calendar</option>
@@ -169,10 +177,10 @@
 </div>
 
 <!-- SECTION 3: Calendar & Schedule Settings -->
-<div class="config-section">
+<div id="sectionCalendar" class="config-section">
     <div class="config-section-title">📅 Calendar & Timeline Configuration</div>
 
-    <div class="form-group">
+    <div id="groupTimelineDuration" class="form-group">
         <label for="timelineDays" class="form-label">Timeline Duration:</label>
         <select id="timelineDays" name="timelineDays" class="form-input">
             <option value="1" selected>1 Day (Today Only)</option>
@@ -181,7 +189,7 @@
         </select>
     </div>
 
-    <div class="form-group">
+    <div id="groupTimelineHours" class="form-group">
         <label class="form-label">Timeline Operating Hours (0 - 24):</label>
         <div class="config-grid-2">
             <div>
@@ -203,7 +211,7 @@
 </div>
 
 <!-- SECTION 4: Weather Settings -->
-<div class="config-section">
+<div id="sectionWeather" class="config-section">
     <div class="config-section-title">⛅ Weather Configuration</div>
 
     <div class="form-group">
@@ -238,15 +246,15 @@
 </div>
 
 <!-- SECTION 5: To-Do & Extra Widgets Configuration -->
-<div class="config-section">
+<div id="sectionExtras" class="config-section">
     <div class="config-section-title">📝 To-Do & Extra Widgets Settings</div>
 
-    <div class="form-group">
+    <div id="groupTodoTitle" class="form-group">
         <label for="todoTitle" class="form-label">To-Do List Header Title:</label>
         <input type="text" id="todoTitle" name="todoTitle" class="form-input" value="Tasks" placeholder="e.g., Daily Checklist" />
     </div>
 
-    <div class="form-group">
+    <div id="groupTodoItems" class="form-group">
         <label for="todoItems" class="form-label">To-Do Items (One task per line):</label>
         <textarea id="todoItems" name="todoItems" class="form-input" rows="4" placeholder="Buy milk&#10;Review PRs&#10;Water plants">Review schedule
 Check emails
@@ -254,7 +262,7 @@ Update dashboard</textarea>
     </div>
 
     <div class="config-grid-2">
-        <div class="form-group">
+        <div id="groupClockFace" class="form-group">
             <label for="clockFace" class="form-label">Clock Face Style:</label>
             <select id="clockFace" name="clockFace" class="form-input">
                 <option value="Gradient Clock" selected>Gradient Clock</option>
@@ -263,7 +271,7 @@ Update dashboard</textarea>
                 <option value="Word Clock">Word Clock</option>
             </select>
         </div>
-        <div class="form-group">
+        <div id="groupComicSelection" class="form-group">
             <label for="comicSelection" class="form-label">Daily Comic Source:</label>
             <select id="comicSelection" name="comicSelection" class="form-input">
                 <option value="xkcd" selected>XKCD</option>
@@ -312,6 +320,36 @@ Update dashboard</textarea>
         }
     }
 
+    function updateDynamicVisibility() {
+        const s1 = document.getElementById('slot1Widget').value;
+        const s2 = document.getElementById('slot2Widget').value;
+        const s3 = document.getElementById('slot3Widget').value;
+        const selected = [s1, s2, s3];
+
+        const hasTimeline = selected.includes('timeline');
+        const hasCalendar = selected.some(w => ['timeline', 'agenda', 'month'].includes(w));
+        const hasWeather = selected.includes('weather');
+        const hasTodo = selected.includes('todo');
+        const hasClock = selected.includes('clock');
+        const hasComic = selected.includes('comic');
+
+        // Section 3: Calendar & Timeline
+        document.getElementById('sectionCalendar').style.display = hasCalendar ? 'block' : 'none';
+        document.getElementById('groupTimelineDuration').style.display = hasTimeline ? 'block' : 'none';
+        document.getElementById('groupTimelineHours').style.display = hasTimeline ? 'block' : 'none';
+
+        // Section 4: Weather
+        document.getElementById('sectionWeather').style.display = hasWeather ? 'block' : 'none';
+
+        // Section 5: Extras
+        const hasExtras = hasTodo || hasClock || hasComic;
+        document.getElementById('sectionExtras').style.display = hasExtras ? 'block' : 'none';
+        document.getElementById('groupTodoTitle').style.display = hasTodo ? 'block' : 'none';
+        document.getElementById('groupTodoItems').style.display = hasTodo ? 'block' : 'none';
+        document.getElementById('groupClockFace').style.display = hasClock ? 'block' : 'none';
+        document.getElementById('groupComicSelection').style.display = hasComic ? 'block' : 'none';
+    }
+
     function addCalendarInput(url = '', color = '#000000') {
         const calendarList = document.getElementById('calendarList');
 
@@ -350,7 +388,6 @@ Update dashboard</textarea>
         let calendars = [{ url: 'https://www.calendarlabs.com/ical-calendar/ics/76/US_Holidays.ics', color: '#000000' }];
 
         if (loadPluginSettings && pluginSettings) {
-            // Load existing iCal URLs
             if (pluginSettings["calendarURLs[]"]) {
                 let urls = Array.isArray(pluginSettings["calendarURLs[]"]) ? pluginSettings["calendarURLs[]"] : [pluginSettings["calendarURLs[]"]];
                 let colors = Array.isArray(pluginSettings["calendarColors[]"]) ? pluginSettings["calendarColors[]"] : [pluginSettings["calendarColors[]"]];
@@ -361,7 +398,6 @@ Update dashboard</textarea>
                 }));
             }
 
-            // Populate standard settings fields
             const fields = [
                 'layoutPreset', 'themeMode', 'fontSize', 'showDividers', 'dividerThickness',
                 'slot1Widget', 'slot2Widget', 'slot3Widget', 'timelineDays',
@@ -377,7 +413,6 @@ Update dashboard</textarea>
                 }
             });
 
-            // Handle legacy weatherLayout mapping if slot widgets weren't explicitly set yet
             if (pluginSettings.slot3Widget === undefined && pluginSettings.weatherLayout) {
                 const s3 = document.getElementById('slot3Widget');
                 if (s3) {
@@ -391,5 +426,6 @@ Update dashboard</textarea>
         });
 
         updateSlotHints();
+        updateDynamicVisibility();
     });
 </script>
