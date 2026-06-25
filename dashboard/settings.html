@@ -1,4 +1,28 @@
 <style>
+    .config-section {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+    .config-section-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--text-main, #1a202c);
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .config-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
     .calendar-entry {
         display: flex;
         gap: 10px;
@@ -6,86 +30,293 @@
         margin-bottom: 10px;
     }
     .color-picker {
-        width: 40px;
+        width: 44px;
         height: 38px;
-        padding: 0;
-        border: none;
+        padding: 2px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
         cursor: pointer;
+        background: transparent;
     }
     .remove-btn {
-        background: none;
-        border: none;
-        color: red;
-        font-size: 1.2rem;
+        background: #fee2e2;
+        border: 1px solid #f87171;
+        color: #b91c1c;
+        border-radius: 6px;
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+        transition: background 0.2s;
+    }
+    .remove-btn:hover {
+        background: #fecaca;
+    }
+    .slot-hint {
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-bottom: 12px;
+        background: #f8fafc;
+        padding: 8px 12px;
+        border-radius: 6px;
+        border-left: 3px solid #3b82f6;
     }
 </style>
 
-<div class="form-group">
-  <label class="form-label">Calendars:</label>
-  <div id="calendarList"></div>
-  <button type="button" id="addCalendarBtn" class="form-input collapsible" onclick="addCalendarInput('', '#000000')">Add Calendar</button>
+<!-- SECTION 1: Layout & Display Appearance -->
+<div class="config-section">
+    <div class="config-section-title">🎨 Layout & Appearance</div>
+    
+    <div class="form-group">
+        <label for="layoutPreset" class="form-label">Layout Template:</label>
+        <select id="layoutPreset" name="layoutPreset" class="form-input" onchange="updateSlotHints()">
+            <option value="left_sidebar" selected>Left Sidebar + Split Main (25% / 75%)</option>
+            <option value="right_sidebar">Right Sidebar + Split Main (75% / 25%)</option>
+            <option value="even_split">Even Split (50% / 50%)</option>
+            <option value="three_column">Three Column Grid (33% / 33% / 33%)</option>
+            <option value="top_banner">Top Banner + Bottom Split</option>
+        </select>
+    </div>
+
+    <div class="config-grid-2">
+        <div class="form-group">
+            <label for="themeMode" class="form-label">Theme Mode:</label>
+            <select id="themeMode" name="themeMode" class="form-input">
+                <option value="light" selected>Light Mode (Crisp White)</option>
+                <option value="dark">Dark Mode (Sleek Inverted)</option>
+                <option value="cards">Card UI (Glass Containers)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fontSize" class="form-label">Global Font Size:</label>
+            <select id="fontSize" name="fontSize" class="form-input">
+                <option value="x-small">Extra Small</option>
+                <option value="small">Small</option>
+                <option value="normal" selected>Normal</option>
+                <option value="large">Large</option>
+                <option value="x-large">Extra Large</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="config-grid-2">
+        <div class="form-group">
+            <label for="showDividers" class="form-label">Dividing Lines:</label>
+            <select id="showDividers" name="showDividers" class="form-input">
+                <option value="true" selected>Enabled</option>
+                <option value="false">Disabled</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="dividerThickness" class="form-label">Divider Thickness (px):</label>
+            <input type="number" id="dividerThickness" name="dividerThickness" class="form-input" min="1" max="8" value="4" />
+        </div>
+    </div>
 </div>
 
-<div class="form-group">
-    <label class="form-label">Location (Weather): </label>
+<!-- SECTION 2: Widget Slot Assignments -->
+<div class="config-section">
+    <div class="config-section-title">🧩 Widget Slot Assignments</div>
+    <div id="slotHintBox" class="slot-hint">Assign widgets to display in each area of your layout.</div>
+
     <div class="form-group">
-        <span>Latitude </span>
-        <input type="text" id="latitude" name="latitude" class="form-input" value="40.7128" />
+        <label id="labelSlot1" for="slot1Widget" class="form-label">Slot 1 Widget:</label>
+        <select id="slot1Widget" name="slot1Widget" class="form-input">
+            <option value="timeline" selected>Daily Timeline Grid</option>
+            <option value="agenda">Upcoming Agenda List</option>
+            <option value="month">Monthly Calendar</option>
+            <option value="weather">Weather Forecast</option>
+            <option value="todo">To-Do Task List</option>
+            <option value="clock">Clock Header</option>
+            <option value="wpotd">Wikipedia Picture of the Day</option>
+            <option value="comic">Daily Comic</option>
+            <option value="none">None (Disabled)</option>
+        </select>
     </div>
+
     <div class="form-group">
-        <span>Longitude </span>
-        <input type="text" id="longitude" name="longitude" class="form-input" value="-74.0060" />
+        <label id="labelSlot2" for="slot2Widget" class="form-label">Slot 2 Widget:</label>
+        <select id="slot2Widget" name="slot2Widget" class="form-input">
+            <option value="timeline">Daily Timeline Grid</option>
+            <option value="agenda">Upcoming Agenda List</option>
+            <option value="month" selected>Monthly Calendar</option>
+            <option value="weather">Weather Forecast</option>
+            <option value="todo">To-Do Task List</option>
+            <option value="clock">Clock Header</option>
+            <option value="wpotd">Wikipedia Picture of the Day</option>
+            <option value="comic">Daily Comic</option>
+            <option value="none">None (Disabled)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label id="labelSlot3" for="slot3Widget" class="form-label">Slot 3 Widget:</label>
+        <select id="slot3Widget" name="slot3Widget" class="form-input">
+            <option value="timeline">Daily Timeline Grid</option>
+            <option value="agenda">Upcoming Agenda List</option>
+            <option value="month">Monthly Calendar</option>
+            <option value="weather" selected>Weather Forecast</option>
+            <option value="todo">To-Do Task List</option>
+            <option value="clock">Clock Header</option>
+            <option value="wpotd">Wikipedia Picture of the Day</option>
+            <option value="comic">Daily Comic</option>
+            <option value="none">None (Disabled)</option>
+        </select>
     </div>
 </div>
-<div class="form-group">
-    <label for="units" class="form-label">Units:</label>
-    <select id="units" name="units" class="form-input">
-        <option value="imperial">Imperial (°F)</option>
-        <option value="metric">Metric (°C)</option>
-        <option value="standard">Standard (K)</option>
-    </select>
-</div>
-<div class="form-group">
-    <label for="fontSize" class="form-label">Font Size:</label>
-    <select id="fontSize" name="fontSize" class="form-input">
-        <option value="x-small">Extra Small</option>
-        <option value="small">Small</option>
-        <option value="normal" selected>Normal</option>
-        <option value="large">Large</option>
-        <option value="x-large">Extra Large</option>
-    </select>
-</div>
-<div class="form-group">
-    <label for="weatherLayout" class="form-label">Weather Layout:</label>
-    <select id="weatherLayout" name="weatherLayout" class="form-input">
-        <option value="full" selected>Full (Graph & 5-Day Forecast)</option>
-        <option value="hourly">Hourly Graph Only</option>
-        <option value="forecast">5-Day Forecast Only</option>
-        <option value="none">None (Disabled)</option>
-    </select>
-</div>
-<div class="form-group">
-    <label class="form-label">Timeline Range (Hours):</label>
-    <div style="display: flex; gap: 10px;">
-        <div style="flex: 1;">
-            <span>Start</span>
-            <input type="number" id="startTimeInterval" name="startTimeInterval" class="form-input" min="0" max="24" value="6" />
+
+<!-- SECTION 3: Calendar & Schedule Settings -->
+<div class="config-section">
+    <div class="config-section-title">📅 Calendar & Timeline Configuration</div>
+
+    <div class="form-group">
+        <label for="timelineDays" class="form-label">Timeline Duration:</label>
+        <select id="timelineDays" name="timelineDays" class="form-input">
+            <option value="1" selected>1 Day (Today Only)</option>
+            <option value="2">2 Days Side-by-Side</option>
+            <option value="3">3 Days Side-by-Side</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">Timeline Operating Hours (0 - 24):</label>
+        <div class="config-grid-2">
+            <div>
+                <span>Start Hour</span>
+                <input type="number" id="startTimeInterval" name="startTimeInterval" class="form-input" min="0" max="24" value="6" />
+            </div>
+            <div>
+                <span>End Hour</span>
+                <input type="number" id="endTimeInterval" name="endTimeInterval" class="form-input" min="0" max="24" value="22" />
+            </div>
         </div>
-        <div style="flex: 1;">
-            <span>End</span>
-            <input type="number" id="endTimeInterval" name="endTimeInterval" class="form-input" min="0" max="24" value="22" />
+    </div>
+
+    <div class="form-group">
+        <label class="form-label">iCal Calendar URLs:</label>
+        <div id="calendarList"></div>
+        <button type="button" id="addCalendarBtn" class="form-input collapsible" style="margin-top: 8px;" onclick="addCalendarInput('', '#000000')">➕ Add Calendar URL</button>
+    </div>
+</div>
+
+<!-- SECTION 4: Weather Settings -->
+<div class="config-section">
+    <div class="config-section-title">⛅ Weather Configuration</div>
+
+    <div class="form-group">
+        <label for="weatherLayout" class="form-label">Weather Details Mode:</label>
+        <select id="weatherLayout" name="weatherLayout" class="form-input">
+            <option value="full" selected>Full (Graph & 5-Day Forecast)</option>
+            <option value="hourly">Hourly Graph Only</option>
+            <option value="forecast">5-Day Forecast Only</option>
+            <option value="none">None (Disabled)</option>
+        </select>
+    </div>
+
+    <div class="config-grid-2">
+        <div class="form-group">
+            <span>Latitude</span>
+            <input type="text" id="latitude" name="latitude" class="form-input" value="40.7128" />
+        </div>
+        <div class="form-group">
+            <span>Longitude</span>
+            <input type="text" id="longitude" name="longitude" class="form-input" value="-74.0060" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="units" class="form-label">Temperature Units:</label>
+        <select id="units" name="units" class="form-input">
+            <option value="imperial" selected>Imperial (°F)</option>
+            <option value="metric">Metric (°C)</option>
+            <option value="standard">Standard (K)</option>
+        </select>
+    </div>
+</div>
+
+<!-- SECTION 5: To-Do & Extra Widgets Configuration -->
+<div class="config-section">
+    <div class="config-section-title">📝 To-Do & Extra Widgets Settings</div>
+
+    <div class="form-group">
+        <label for="todoTitle" class="form-label">To-Do List Header Title:</label>
+        <input type="text" id="todoTitle" name="todoTitle" class="form-input" value="Tasks" placeholder="e.g., Daily Checklist" />
+    </div>
+
+    <div class="form-group">
+        <label for="todoItems" class="form-label">To-Do Items (One task per line):</label>
+        <textarea id="todoItems" name="todoItems" class="form-input" rows="4" placeholder="Buy milk&#10;Review PRs&#10;Water plants">Review schedule
+Check emails
+Update dashboard</textarea>
+    </div>
+
+    <div class="config-grid-2">
+        <div class="form-group">
+            <label for="clockFace" class="form-label">Clock Face Style:</label>
+            <select id="clockFace" name="clockFace" class="form-input">
+                <option value="Gradient Clock" selected>Gradient Clock</option>
+                <option value="Digital Clock">Digital Clock</option>
+                <option value="Divided Clock">Divided Clock</option>
+                <option value="Word Clock">Word Clock</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="comicSelection" class="form-label">Daily Comic Source:</label>
+            <select id="comicSelection" name="comicSelection" class="form-input">
+                <option value="xkcd" selected>XKCD</option>
+                <option value="garfield">Garfield</option>
+                <option value="calvin_and_hobbes">Calvin & Hobbes</option>
+                <option value="dilbert">Dilbert</option>
+                <option value="peanuts">Peanuts</option>
+            </select>
         </div>
     </div>
 </div>
 
 <script>
+    function updateSlotHints() {
+        const preset = document.getElementById('layoutPreset').value;
+        const hintBox = document.getElementById('slotHintBox');
+        const l1 = document.getElementById('labelSlot1');
+        const l2 = document.getElementById('labelSlot2');
+        const l3 = document.getElementById('labelSlot3');
+
+        if (preset === 'left_sidebar') {
+            hintBox.innerText = 'Left Sidebar (25% width) + Split Main area on the right.';
+            l1.innerText = 'Slot 1 (Left Sidebar):';
+            l2.innerText = 'Slot 2 (Top Right):';
+            l3.innerText = 'Slot 3 (Bottom Right):';
+        } else if (preset === 'right_sidebar') {
+            hintBox.innerText = 'Split Main area on the left + Right Sidebar (25% width).';
+            l1.innerText = 'Slot 1 (Right Sidebar):';
+            l2.innerText = 'Slot 2 (Top Left):';
+            l3.innerText = 'Slot 3 (Bottom Left):';
+        } else if (preset === 'even_split') {
+            hintBox.innerText = 'Two side-by-side columns split evenly (50% / 50%). Slot 3 is unused.';
+            l1.innerText = 'Slot 1 (Left Half):';
+            l2.innerText = 'Slot 2 (Right Half):';
+            l3.innerText = 'Slot 3 (Unused):';
+        } else if (preset === 'three_column') {
+            hintBox.innerText = 'Three vertical columns split evenly across the display.';
+            l1.innerText = 'Slot 1 (Left Column):';
+            l2.innerText = 'Slot 2 (Center Column):';
+            l3.innerText = 'Slot 3 (Right Column):';
+        } else if (preset === 'top_banner') {
+            hintBox.innerText = 'Full width Top Banner (25% height) + Two side-by-side slots below.';
+            l1.innerText = 'Slot 1 (Top Banner):';
+            l2.innerText = 'Slot 2 (Bottom Left):';
+            l3.innerText = 'Slot 3 (Bottom Right):';
+        }
+    }
+
     function addCalendarInput(url = '', color = '#000000') {
         const calendarList = document.getElementById('calendarList');
 
         const wrapper = document.createElement('div');
         wrapper.classList.add('calendar-entry');
-        wrapper.classList.add('form-group');
 
         const colorInput = document.createElement('input');
         colorInput.type = 'color';
@@ -96,9 +327,10 @@
         const urlInput = document.createElement('input');
         urlInput.type = 'text';
         urlInput.name = 'calendarURLs[]';
-        urlInput.placeholder = 'Calendar URL';
+        urlInput.placeholder = 'https://example.com/calendar.ics';
         urlInput.required = true;
         urlInput.classList.add('form-input');
+        urlInput.style.flex = '1';
         urlInput.value = url;
 
         const removeBtn = document.createElement('button');
@@ -117,32 +349,47 @@
     document.addEventListener('DOMContentLoaded', () => {
         let calendars = [{ url: 'https://www.calendarlabs.com/ical-calendar/ics/76/US_Holidays.ics', color: '#000000' }];
 
-        if (loadPluginSettings && pluginSettings["calendarURLs[]"]) {
-            // handle case where array might be a single string if only one was saved
-            let urls = Array.isArray(pluginSettings["calendarURLs[]"]) ? pluginSettings["calendarURLs[]"] : [pluginSettings["calendarURLs[]"]];
-            let colors = Array.isArray(pluginSettings["calendarColors[]"]) ? pluginSettings["calendarColors[]"] : [pluginSettings["calendarColors[]"]];
-            
-            calendars = urls.map((url, i) => ({
-                url: url || '',
-                color: colors[i] || '#000000'
-            }));
-            
-            if (pluginSettings.fontSize) {
-                document.getElementById('fontSize').value = pluginSettings.fontSize;
+        if (loadPluginSettings && pluginSettings) {
+            // Load existing iCal URLs
+            if (pluginSettings["calendarURLs[]"]) {
+                let urls = Array.isArray(pluginSettings["calendarURLs[]"]) ? pluginSettings["calendarURLs[]"] : [pluginSettings["calendarURLs[]"]];
+                let colors = Array.isArray(pluginSettings["calendarColors[]"]) ? pluginSettings["calendarColors[]"] : [pluginSettings["calendarColors[]"]];
+                
+                calendars = urls.map((url, i) => ({
+                    url: url || '',
+                    color: colors[i] || '#000000'
+                }));
             }
-            if (pluginSettings.weatherLayout) {
-                document.getElementById('weatherLayout').value = pluginSettings.weatherLayout;
-            }
-            if (pluginSettings.startTimeInterval) {
-                document.getElementById('startTimeInterval').value = pluginSettings.startTimeInterval;
-            }
-            if (pluginSettings.endTimeInterval) {
-                document.getElementById('endTimeInterval').value = pluginSettings.endTimeInterval;
+
+            // Populate standard settings fields
+            const fields = [
+                'layoutPreset', 'themeMode', 'fontSize', 'showDividers', 'dividerThickness',
+                'slot1Widget', 'slot2Widget', 'slot3Widget', 'timelineDays',
+                'startTimeInterval', 'endTimeInterval', 'weatherLayout',
+                'latitude', 'longitude', 'units', 'todoTitle', 'todoItems',
+                'clockFace', 'comicSelection'
+            ];
+
+            fields.forEach(f => {
+                const el = document.getElementById(f);
+                if (el && pluginSettings[f] !== undefined) {
+                    el.value = pluginSettings[f];
+                }
+            });
+
+            // Handle legacy weatherLayout mapping if slot widgets weren't explicitly set yet
+            if (pluginSettings.slot3Widget === undefined && pluginSettings.weatherLayout) {
+                const s3 = document.getElementById('slot3Widget');
+                if (s3) {
+                    s3.value = pluginSettings.weatherLayout === 'none' ? 'none' : 'weather';
+                }
             }
         }
 
         calendars.forEach(({ url, color }) => {
             addCalendarInput(url, color);
         });
+
+        updateSlotHints();
     });
 </script>
