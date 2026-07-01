@@ -64,57 +64,6 @@
         background: rgba(239, 68, 68, 0.3);
     }
 
-    /* E-Ink Palette Guide Styles */
-    .palette-guide {
-        background: rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        border-radius: 10px;
-        padding: 14px;
-        margin-bottom: 16px;
-    }
-    .palette-group-title {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: #94a3b8;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-top: 10px;
-        margin-bottom: 6px;
-    }
-    .palette-group-title:first-child {
-        margin-top: 0;
-    }
-    .palette-swatches {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-    .palette-swatch {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.18);
-        border-radius: 6px;
-        padding: 5px 10px;
-        cursor: pointer;
-        transition: all 0.15s ease;
-        font-size: 0.8rem;
-        color: #e2e8f0;
-    }
-    .palette-swatch:hover {
-        background: rgba(255, 255, 255, 0.18);
-        border-color: #38bdf8;
-        transform: translateY(-1px);
-    }
-    .swatch-circle {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-        border: 1px solid rgba(0, 0, 0, 0.35);
-        flex-shrink: 0;
-    }
-
     /* Interactive Layout Splitter Tree Styles */
     .tree-builder-container {
         display: flex;
@@ -321,79 +270,19 @@
     </div>
 
     <datalist id="epd-color-presets">
-        <!-- Primary (3) -->
-        <option value="#FF0000" label="Primary: Pure Red (Native)"></option>
-        <option value="#FFFF00" label="Primary: Pure Yellow (Native)"></option>
-        <option value="#0000FF" label="Primary: Pure Blue (Native)"></option>
-        <!-- Secondary (3) -->
-        <option value="#00FF00" label="Secondary: Pure Green (Native)"></option>
-        <option value="#FF8000" label="Secondary: Warm Orange (Dithered Red+Yellow)"></option>
-        <option value="#80FF00" label="Secondary: Lime Green (Dithered Yellow+Green)"></option>
-        <!-- Tertiary (6) -->
-        <option value="#FF4000" label="Tertiary: Tangerine (Dithered Red+Yellow)"></option>
-        <option value="#FFBF00" label="Tertiary: Amber Gold (Dithered Red+Yellow)"></option>
-        <option value="#80FF80" label="Tertiary: Mint Green (Dithered Green+White)"></option>
-        <option value="#80C0FF" label="Tertiary: Sky Blue (Dithered Blue+White)"></option>
-        <option value="#FF8080" label="Tertiary: Coral Rose (Dithered Red+White)"></option>
-        <option value="#40A0FF" label="Tertiary: Azure Ice (Dithered Blue+White)"></option>
+        <option value="#FF0000" label="Pure Red (Primary Native)"></option>
+        <option value="#FF8080" label="Coral Rose (Tertiary Dithered)"></option>
+        <option value="#FF4000" label="Tangerine (Tertiary Dithered)"></option>
+        <option value="#FF8000" label="Warm Orange (Secondary Dithered)"></option>
+        <option value="#FFBF00" label="Amber Gold (Tertiary Dithered)"></option>
+        <option value="#FFFF00" label="Pure Yellow (Primary Native)"></option>
+        <option value="#80FF00" label="Lime Green (Secondary Dithered)"></option>
+        <option value="#00FF00" label="Pure Green (Secondary Native)"></option>
+        <option value="#80FF80" label="Mint Green (Tertiary Dithered)"></option>
+        <option value="#80C0FF" label="Sky Blue (Tertiary Dithered)"></option>
+        <option value="#40A0FF" label="Azure Ice (Tertiary Dithered)"></option>
+        <option value="#0000FF" label="Pure Blue (Primary Native)"></option>
     </datalist>
-
-    <div class="palette-guide">
-        <div style="font-size: 0.92rem; font-weight: 700; color: #f8fafc; margin-bottom: 4px;">
-            🎨 Spectra 6 Vibrant Palette Guide (Click to Apply)
-        </div>
-        <div style="font-size: 0.78rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.4;">
-            Curated specifically for 13.3" 6-color E-Ink displays. Clicking any color sets it on your active calendar and makes it default for new ones.
-        </div>
-
-        <div class="palette-group-title">Primary Colors (3 Native Pigments)</div>
-        <div class="palette-swatches">
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#FF0000')" title="Native Pure Red">
-                <span class="swatch-circle" style="background: #FF0000;"></span> Red (#FF0000)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#FFFF00')" title="Native Pure Yellow">
-                <span class="swatch-circle" style="background: #FFFF00;"></span> Yellow (#FFFF00)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#0000FF')" title="Native Pure Blue">
-                <span class="swatch-circle" style="background: #0000FF;"></span> Blue (#0000FF)
-            </button>
-        </div>
-
-        <div class="palette-group-title">Secondary Colors (3 Vibrant Native/Dithered)</div>
-        <div class="palette-swatches">
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#00FF00')" title="Native Pure Green">
-                <span class="swatch-circle" style="background: #00FF00;"></span> Green (#00FF00)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#FF8000')" title="Dithered 50% Red + 50% Yellow">
-                <span class="swatch-circle" style="background: #FF8000;"></span> Warm Orange (#FF8000)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#80FF00')" title="Dithered 50% Yellow + 50% Green">
-                <span class="swatch-circle" style="background: #80FF00;"></span> Lime Green (#80FF00)
-            </button>
-        </div>
-
-        <div class="palette-group-title">Tertiary Colors (6 High-Contrast Dithered)</div>
-        <div class="palette-swatches">
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#FF4000')" title="Dithered 75% Red + 25% Yellow">
-                <span class="swatch-circle" style="background: #FF4000;"></span> Tangerine (#FF4000)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#FFBF00')" title="Dithered 25% Red + 75% Yellow">
-                <span class="swatch-circle" style="background: #FFBF00;"></span> Amber Gold (#FFBF00)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#80FF80')" title="Dithered 50% Green + 50% White">
-                <span class="swatch-circle" style="background: #80FF80;"></span> Mint Green (#80FF80)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#80C0FF')" title="Dithered 50% Blue + 50% White">
-                <span class="swatch-circle" style="background: #80C0FF;"></span> Sky Blue (#80C0FF)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#FF8080')" title="Dithered 50% Red + 50% White">
-                <span class="swatch-circle" style="background: #FF8080;"></span> Coral Rose (#FF8080)
-            </button>
-            <button type="button" class="palette-swatch" onclick="selectPresetColor('#40A0FF')" title="Dithered 75% Blue + 25% White">
-                <span class="swatch-circle" style="background: #40A0FF;"></span> Azure Ice (#40A0FF)
-            </button>
-        </div>
-    </div>
 
     <div class="form-group">
         <label class="form-label">iCal Calendar URLs:</label>
@@ -479,19 +368,6 @@ Update dashboard</textarea>
     let nodeCounter = 100;
     let currentLayoutTree = null;
     let defaultCalendarColor = '#000000';
-
-    function selectPresetColor(hex) {
-        defaultCalendarColor = hex;
-        const addBtn = document.getElementById('addCalendarBtn');
-        if (addBtn) {
-            addBtn.setAttribute('onclick', `addCalendarInput('', '${hex}')`);
-            addBtn.style.borderLeft = `4px solid ${hex}`;
-        }
-        const entries = document.querySelectorAll('.calendar-entry .color-picker');
-        if (entries.length > 0) {
-            entries[entries.length - 1].value = hex;
-        }
-    }
 
     function getDefaultTree() {
         return {
